@@ -1,0 +1,7 @@
+# 検証用に clone した 2026-phase-2。中身は upstream のものなので追跡しない。
+# 作り直しは experiments/README.md の手順を参照（commit SHA もそこに固定してある）。
+experiments/fixture/
+
+# runs/ は追跡する。実験データ本体なので消してはいけない。
+__pycache__/
+*.pyc

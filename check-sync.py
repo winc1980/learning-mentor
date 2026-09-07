@@ -5,6 +5,7 @@
 
   1. learning-mentor-setup.md の「--- ここから下が本文 ---」以降（配置用プロンプトに埋め込む用）
   2. .claude/agents/learn.md の frontmatter 以降（`claude --agent learn` 用の参照実装）
+  3. experiments/fixture/.claude/agents/learn.md（検証ハーネスが被験体として起動する実体）
 
 本体を更新したあと、このスクリプトを実行してコピー先の貼り直し漏れを検出する。
 
@@ -31,6 +32,12 @@ SETUP = "learning-mentor-setup.md"
 SETUP_MARKER = "--- ここから下が本文 ---"
 
 AGENT = os.path.join(".claude", "agents", "learn.md")
+
+# 検証ハーネスが fixture 内に置くコピー。fixture 自体は git 管理外だが、
+# 本体を更新したときの貼り直し漏れはここでも起きる。しかもここでずれると
+# 「途中でメンターのプロンプトが変わった run」という最悪の事故になるため、
+# experiments/run.py は起動時にこの検査を通してから実行する。
+FIXTURE_AGENT = os.path.join("experiments", "fixture", ".claude", "agents", "learn.md")
 
 
 def read(relpath):
@@ -100,6 +107,7 @@ def main():
     targets = [
         (SETUP, extract_from_setup),
         (AGENT, extract_from_agent),
+        (FIXTURE_AGENT, extract_from_agent),
     ]
 
     failed = False

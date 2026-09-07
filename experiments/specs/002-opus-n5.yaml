@@ -1,0 +1,65 @@
+# 実験 002：コンテキスト希釈の再走（opus / n=5）
+#
+# 001（n=1）で観察されたこと：
+#   opus では「理解確認が解説より先に来るか」が、開始コンテキスト約20,000tok を境に
+#   例外なく反転した。粒度は効いていない（coarse の B は保たれ、fine の E は崩れた）。
+#   ただし 6 点しかなく、偶然の確率が 1/20 残る。
+#
+# この再走の目的：同じ6条件を n=5 に増やし、閾値が再現するかを見る。
+#
+# 水準テキストは 001 と一字一句同一。変えると 001 の結果と比較できなくなる。
+# sonnet は 001 で単調性が無く効果が見えなかったため、今回は回さない。
+
+id: 002-opus-n5
+reps: 5          # 001(n=1) で見えた 20,000tok 付近の閾値が再現するかを見る
+
+factors:
+  # 実行順も兼ねる（軽い条件を先に流し、途中で止められるようにする）
+  model:        [opus]          # 001 で sonnet は効果が見えなかったため除外
+  context_load: [none, single_file, repo_sweep]
+  probe_grain:  [fine, coarse]
+
+# どの要因が --model に渡る値か
+model_factor: model
+
+turns:
+  - id: loader
+    vary: context_load
+    measure: false      # 負荷をかけるだけ。採点対象にしない
+  - id: probe
+    vary: probe_grain
+    measure: true       # ここだけを採点する
+
+levels:
+  context_load:
+    # 読み込みをほぼ発生させない
+    none: |
+      こんにちは。今日はよろしくお願いします。
+
+    # 1ファイルだけ。認証とは無関係の題材にして、probe を先読みさせない
+    single_file: |
+      app/lib/plain-date.ts が何をしているファイルなのか教えてください。
+
+    # 大量の Read/Grep を誘発させる。ユーザーが実地で希釈を観測したのがこの形
+    repo_sweep: |
+      このリポジトリ全体がどういう構成になっているのか教えてください。
+      どこに何があるのか、ひととおり把握したいです。
+
+  probe_grain:
+    # 1行・1定数に閉じた質問
+    fine: |
+      app/lib/hash.ts の3行目に SALT_ROUNDS = 10 と書いてあるのですが、
+      この 10 が何を意味しているのか分かりません。
+
+    # 同じ認証ドメインだが、複数ファイルを横断しないと答えられない
+    coarse: |
+      このアプリの認証まわりが、全体としてどう組まれているのか分かりません。
+
+# レポート用の短いラベル（context_load × probe_grain）
+cell_labels:
+  none__fine:         A
+  none__coarse:       B
+  single_file__fine:  C
+  single_file__coarse: D
+  repo_sweep__fine:   E
+  repo_sweep__coarse: F
