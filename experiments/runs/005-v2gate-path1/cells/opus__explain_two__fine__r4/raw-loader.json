@@ -1,0 +1,234 @@
+{
+  "init": {
+    "type": "system",
+    "subtype": "init",
+    "cwd": "C:\\Users\\stama\\winc\\general\\learning-mentor\\experiments\\fixture",
+    "session_id": "208615ec-1a59-4c7c-b4a4-892b658d5620",
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "mcp_servers": [],
+    "model": "claude-opus-5",
+    "permissionMode": "default",
+    "slash_commands": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator",
+      "advisor",
+      "agents",
+      "auto-mode-setup",
+      "autocompact",
+      "clear",
+      "color",
+      "compact",
+      "config",
+      "context",
+      "effort",
+      "fast",
+      "heapdump",
+      "init",
+      "mcp",
+      "import",
+      "model",
+      "__remote-workflow",
+      "workflow-launch-exec",
+      "reload-plugins",
+      "reload-skills",
+      "rename",
+      "ultrareview",
+      "security-review",
+      "usage-credits",
+      "extra-usage",
+      "usage",
+      "insights",
+      "recap",
+      "skill-doctor",
+      "goal",
+      "design-consent",
+      "design-revoke",
+      "list-agents",
+      "team-onboarding"
+    ],
+    "terminal_slash_commands": [
+      "doctor",
+      "color",
+      "reload-plugins"
+    ],
+    "apiKeySource": "none",
+    "claude_code_version": "2.1.263",
+    "output_style": "default",
+    "agents": [
+      "claude",
+      "claude-code-guide",
+      "Explore",
+      "general-purpose",
+      "learn",
+      "Plan",
+      "statusline-setup",
+      "v2-gate"
+    ],
+    "skills": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator"
+    ],
+    "plugins": [],
+    "capabilities": [
+      "interrupt_receipt_v1",
+      "interrupt_cancel_queued_v1",
+      "msg_lifecycle_v1"
+    ],
+    "analytics_disabled": false,
+    "product_feedback_disabled": false,
+    "uuid": "c9a3043e-8fbd-481b-ae7b-9ccaed6d8208",
+    "memory_paths": {
+      "auto": "C:\\Users\\stama\\.claude\\projects\\C--Users-stama-winc-general-learning-mentor-experiments-fixture\\memory\\"
+    },
+    "messaging_socket_path": "\\\\.\\pipe\\LOCAL\\cc-msg-d99608e73eb50163c2bf368217828ff3",
+    "fast_mode_state": "off",
+    "powershell_path": "C:\\Users\\stama\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe"
+  },
+  "result": {
+    "duration_api_ms": 19448,
+    "stop_reason": "end_turn",
+    "session_id": "208615ec-1a59-4c7c-b4a4-892b658d5620",
+    "total_cost_usd": 0.054960499999999995,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 2000,
+      "cache_read_input_tokens": 19261,
+      "output_tokens": 971,
+      "output_tokens_details": {
+        "thinking_tokens": 260
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 2000,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 789,
+          "cache_read_input_tokens": 9979,
+          "cache_creation_input_tokens": 1303,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 1303
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 925,
+        "outputTokens": 22,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.0010350000000000001,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5": {
+        "inputTokens": 4,
+        "outputTokens": 971,
+        "cacheReadInputTokens": 19261,
+        "cacheCreationInputTokens": 2000,
+        "webSearchRequests": 0,
+        "costUSD": 0.0539255,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 260,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 3,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "両方読みました。まず**それぞれが何のためにあるか、一行だけ**書きます（中身の説明はまだしません）。\n\n| ファイル | ざっくりの役割 |\n|---|---|\n| `plain-date.ts` | 「年・月・日」だけを持つ日付の型。時刻・タイムゾーンを持たない |\n| `result.ts` | 処理の成功/失敗を、例外ではなく**戻り値**で表すための仕組み |\n\nここから先を、どう聞きたいか決めさせてください。2つ聞きます。\n\n**1つめ。** この2つのファイルに行き着いたきっかけは何ですか。\n\n- 他のファイルを読んでいたら `PlainDate` や `Result` が出てきて、意味が取れなかった\n- コードベース全体を把握しようとして、上から順に読んでいる\n- これらを使うコードを自分で書こうとしている\n\nどれに近いですか。きっかけによって、説明すべきところがけっこう変わります。\n\n**2つめ、レベル合わせのために。** 正確じゃなくて大丈夫です、「たぶん」でも「知らない」でも構いません。\n\n`Result<T, E>` のような、**成功と失敗を戻り値で返す書き方**は、これまでに見たり書いたりしたことがありますか。Rust や Go、あるいは fp-ts のようなライブラリで見たことがある、でも構いません。\n\n（`plain-date.ts` の `Serde` については、`./serde` を見れば分かるので、必要になったらそのとき一緒に見ましょう。）",
+    "ttft_ms": 1522,
+    "type": "result",
+    "duration_ms": 18517,
+    "uuid": "629b4d0e-7b61-4f67-ac6e-163a62b6e0ea",
+    "ttft_stream_ms": 1097,
+    "time_to_request_ms": 114,
+    "first_content_frame_ms": 1097,
+    "queued_turn_count": 0
+  }
+}

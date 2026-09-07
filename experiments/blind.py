@@ -121,14 +121,12 @@ def cmd_join(run_dir, spec_id):
                     print("警告: 未知のID %r（%s）" % (bid, fn))
                     continue
                 r = rows.get(cell, {})
-                judged.append(dict(item, cell=cell, judge=judge,
-                                   model=r.get("model"),
-                                   context_load=r.get("context_load"),
-                                   probe_grain=r.get("probe_grain"),
-                                   label=r.get("label"),
-                                   開始時コンテキストtok=r.get("開始時コンテキストtok"),
-                                   ツール往復数=r.get("ツール往復数"),
-                                   問い返し密度=r.get("問い返し密度")))
+                # 条件列は spec の要因名がそのまま入るので、決め打ちせず
+                # metrics 行を丸ごと持ってくる（採点結果のキーは上書きしない）。
+                merged = dict((k, v) for k, v in r.items() if k not in item)
+                for drop in ("session_id", "cell", "judge"):
+                    merged.pop(drop, None)
+                judged.append(dict(item, cell=cell, judge=judge, **merged))
 
     out = os.path.join(run_dir, "judgments.jsonl")
     with io.open(out, "w", encoding="utf-8", newline="\n") as f:

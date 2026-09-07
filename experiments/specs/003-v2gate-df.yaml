@@ -1,0 +1,65 @@
+# 実験 003：バリアント v2-gate の効果測定（opus / n=5）
+#
+# 002 で崩壊した2条件（D = single_file×coarse, F = repo_sweep×coarse）だけを、
+# 修正版プロンプト v2-gate で再走する。002 では両条件とも理解確認が 0/10 で、
+# 床が明確なので改善の検出力が高い。
+#
+# 002 との違いは agent_variant の1行だけ。水準テキスト・ターン構成・反復数・モデルは同一。
+# probe_grain は coarse のみ（崩壊が起きるのは coarse 側だけだったため）。
+#
+# 比較対象：experiments/runs/002-opus-n5 の D・F（各10判定）
+
+id: 003-v2gate-df
+reps: 5          # 002 の D・F と同数にして直接比較する
+agent_variant: experiments/variants/v2-gate.md
+
+factors:
+  # 実行順も兼ねる（軽い条件を先に流し、途中で止められるようにする）
+  model:        [opus]          # 001 で sonnet は効果が見えなかったため除外
+  context_load: [single_file, repo_sweep]   # 002 で崩壊した2条件のみ
+  probe_grain:  [coarse]                    # 崩壊は coarse 側だけで起きた
+
+# どの要因が --model に渡る値か
+model_factor: model
+
+turns:
+  - id: loader
+    vary: context_load
+    measure: false      # 負荷をかけるだけ。採点対象にしない
+  - id: probe
+    vary: probe_grain
+    measure: true       # ここだけを採点する
+
+levels:
+  context_load:
+    # 読み込みをほぼ発生させない
+    none: |
+      こんにちは。今日はよろしくお願いします。
+
+    # 1ファイルだけ。認証とは無関係の題材にして、probe を先読みさせない
+    single_file: |
+      app/lib/plain-date.ts が何をしているファイルなのか教えてください。
+
+    # 大量の Read/Grep を誘発させる。ユーザーが実地で希釈を観測したのがこの形
+    repo_sweep: |
+      このリポジトリ全体がどういう構成になっているのか教えてください。
+      どこに何があるのか、ひととおり把握したいです。
+
+  probe_grain:
+    # 1行・1定数に閉じた質問
+    fine: |
+      app/lib/hash.ts の3行目に SALT_ROUNDS = 10 と書いてあるのですが、
+      この 10 が何を意味しているのか分かりません。
+
+    # 同じ認証ドメインだが、複数ファイルを横断しないと答えられない
+    coarse: |
+      このアプリの認証まわりが、全体としてどう組まれているのか分かりません。
+
+# レポート用の短いラベル（context_load × probe_grain）
+cell_labels:
+  none__fine:         A
+  none__coarse:       B
+  single_file__fine:  C
+  single_file__coarse: D
+  repo_sweep__fine:   E
+  repo_sweep__coarse: F

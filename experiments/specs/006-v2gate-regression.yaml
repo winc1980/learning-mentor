@@ -1,0 +1,73 @@
+# 実験 006：v2-gate の退行チェック（opus / n=5）
+#
+# 005 までで v2-gate は崩壊条件を戻すことが分かった。残る問いは、
+# **元から崩れていなかった条件を壊していないか**。
+#
+# 002 で 10/10 保持だった3条件を、v2-gate で回して比較する。
+#   A  none        × fine    002: 10/10
+#   B  none        × coarse  002: 10/10  ← パッチ2が最も影響しうる条件
+#   E  repo_sweep  × fine    002: 10/10
+#
+# 要因の直積になるので F（repo_sweep × coarse）も入る。
+# これは 003 の F（8/10）の再現確認として使う。
+#
+# 002 との差は agent_variant の1行だけ。水準テキスト・ターン構成・反復数・モデルは同一。
+#
+# 特に見るべき点：B でパッチ2の規範例が余計な前置きを増やしていないか。
+# B は「広い質問だが素のプロンプトで保持できていた」唯一の条件なので、
+# ここで字数が膨らんだり確認が形骸化したりすれば、パッチ2の副作用ということになる。
+
+id: 006-v2gate-regression
+reps: 5          # 002 と同数にして直接比較する
+agent_variant: experiments/variants/v2-gate.md
+
+factors:
+  # 実行順も兼ねる（軽い条件を先に流し、途中で止められるようにする）
+  model:        [opus]          # 001 で sonnet は効果が見えなかったため除外
+  context_load: [none, repo_sweep]   # 002 で保持だった A/B/E を含む（single_file は 005 で確認済み）
+  probe_grain:  [fine, coarse]
+
+# どの要因が --model に渡る値か
+model_factor: model
+
+turns:
+  - id: loader
+    vary: context_load
+    measure: false      # 負荷をかけるだけ。採点対象にしない
+  - id: probe
+    vary: probe_grain
+    measure: true       # ここだけを採点する
+
+levels:
+  context_load:
+    # 読み込みをほぼ発生させない
+    none: |
+      こんにちは。今日はよろしくお願いします。
+
+    # 1ファイルだけ。認証とは無関係の題材にして、probe を先読みさせない
+    single_file: |
+      app/lib/plain-date.ts が何をしているファイルなのか教えてください。
+
+    # 大量の Read/Grep を誘発させる。ユーザーが実地で希釈を観測したのがこの形
+    repo_sweep: |
+      このリポジトリ全体がどういう構成になっているのか教えてください。
+      どこに何があるのか、ひととおり把握したいです。
+
+  probe_grain:
+    # 1行・1定数に閉じた質問
+    fine: |
+      app/lib/hash.ts の3行目に SALT_ROUNDS = 10 と書いてあるのですが、
+      この 10 が何を意味しているのか分かりません。
+
+    # 同じ認証ドメインだが、複数ファイルを横断しないと答えられない
+    coarse: |
+      このアプリの認証まわりが、全体としてどう組まれているのか分かりません。
+
+# レポート用の短いラベル（context_load × probe_grain）
+cell_labels:
+  none__fine:         A
+  none__coarse:       B
+  single_file__fine:  C
+  single_file__coarse: D
+  repo_sweep__fine:   E
+  repo_sweep__coarse: F

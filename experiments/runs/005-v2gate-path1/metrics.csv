@@ -1,0 +1,16 @@
+﻿cell,session_id,label,model,loader_kind,probe_grain,rep,応答文字数,疑問符数,質問文数,問い返し密度,採点語,フレーミング,重大度ラベル,実装代行,はしご降ろし,コードブロック数,コード最大行数,コード10行超,固有識別子の混入,混入した識別子,開始時コンテキストtok,終了時コンテキストtok,出力tok,ツール往復数,num_turns,所要ms,コストUSD,is_error,stop_reason,ツール集合一致,余分なツール,turn_measured
+opus__explain_one__fine__r1,73f1c6d6-ac1c-46d2-9ad0-e51b0e185f0d,,opus,explain_one,fine,1,409,0,2,4.89,0,1,0,0,0,0,0,0,0,,12428,12428,1117,0,2,18182,0.051296,0,end_turn,1,,probe
+opus__explain_one__fine__r2,039e8f5c-ff61-49f3-8c76-233970869139,,opus,explain_one,fine,2,517,0,2,3.868,0,2,0,0,0,0,0,0,0,,12103,12103,1121,0,2,20085,0.052768499999999996,0,end_turn,1,,probe
+opus__explain_one__fine__r3,c7bc60bd-2f69-4005-8cc6-d7dcb521f1fb,,opus,explain_one,fine,3,486,0,2,4.115,0,2,0,0,0,0,0,0,0,,12085,12085,966,0,2,17768,0.048676000000000004,0,end_turn,1,,probe
+opus__explain_one__fine__r4,49a2b1ce-eb28-4c42-9126-12d83ffb07a9,,opus,explain_one,fine,4,434,1,2,4.608,0,1,0,0,1,0,0,0,0,,12115,12115,938,0,2,15891,0.047224499999999996,0,end_turn,1,,probe
+opus__explain_one__fine__r5,f0501081-51b3-4580-8aa3-50598ede3e51,,opus,explain_one,fine,5,508,2,2,3.937,0,2,0,0,0,0,0,0,0,,11743,11743,864,0,2,15465,0.0425715,0,end_turn,1,,probe
+opus__explain_two__fine__r1,1634b24d-62b2-4789-a8fe-21573daa9559,,opus,explain_two,fine,1,592,0,1,1.689,1,1,0,0,0,0,0,0,0,,12158,12158,1137,0,2,21663,0.0487205,0,end_turn,1,,probe
+opus__explain_two__fine__r2,15a8fd10-ebd3-439b-a938-ba20238d8403,,opus,explain_two,fine,2,492,2,2,4.065,0,1,0,0,0,0,0,0,0,,12532,12532,877,0,2,16329,0.046179,0,end_turn,1,,probe
+opus__explain_two__fine__r3,18c8529f-c2d5-4066-903a-16cea7506d18,,opus,explain_two,fine,3,661,0,2,3.026,0,2,0,0,1,0,0,0,0,,13115,13115,1139,0,2,21441,0.05884450000000001,0,end_turn,1,,probe
+opus__explain_two__fine__r4,208615ec-1a59-4c7c-b4a4-892b658d5620,,opus,explain_two,fine,4,417,0,2,4.796,0,1,0,0,0,0,0,0,0,,12595,12595,903,0,2,17263,0.04742350000000001,0,end_turn,1,,probe
+opus__explain_two__fine__r5,a8db1fa2-061a-4117-9b79-c867bf0030ab,,opus,explain_two,fine,5,460,2,2,4.348,0,1,0,0,0,0,0,0,0,,12633,12633,1219,0,2,22237,0.055691000000000004,0,end_turn,1,,probe
+opus__list_only__fine__r1,6d4c56d4-fa77-4ccf-a366-f2180b7373a9,,opus,list_only,fine,1,393,0,2,5.089,0,0,0,0,0,0,0,0,0,,10823,10823,790,0,2,14813,0.036782,0,end_turn,1,,probe
+opus__list_only__fine__r2,e31cc817-cc39-453c-8c57-95b970ec5e8a,,opus,list_only,fine,2,378,0,3,7.937,0,1,0,0,0,0,0,0,0,,11077,11077,877,0,2,15697,0.041421,0,end_turn,1,,probe
+opus__list_only__fine__r3,a671c77e-c26e-49a1-aaba-f8fc6e9ce974,,opus,list_only,fine,3,398,0,1,2.513,0,2,0,0,0,0,0,0,0,,10884,10884,754,0,2,15457,0.036336499999999994,0,end_turn,1,,probe
+opus__list_only__fine__r4,add8bee6-ea84-4e90-ab8c-93fd71181276,,opus,list_only,fine,4,398,0,1,2.513,0,2,0,0,0,0,0,0,0,,10931,10931,780,0,2,13815,0.0376675,0,end_turn,1,,probe
+opus__list_only__fine__r5,7bb632f7-d462-4e7f-99c1-92e9687a4631,,opus,list_only,fine,5,337,1,2,5.935,0,1,0,0,1,0,0,0,0,,10777,10777,919,0,2,17710,0.0395495,0,end_turn,1,,probe

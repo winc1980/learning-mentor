@@ -1,0 +1,234 @@
+{
+  "init": {
+    "type": "system",
+    "subtype": "init",
+    "cwd": "C:\\Users\\stama\\winc\\general\\learning-mentor\\experiments\\fixture",
+    "session_id": "a8db1fa2-061a-4117-9b79-c867bf0030ab",
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "mcp_servers": [],
+    "model": "claude-opus-5",
+    "permissionMode": "default",
+    "slash_commands": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator",
+      "advisor",
+      "agents",
+      "auto-mode-setup",
+      "autocompact",
+      "clear",
+      "color",
+      "compact",
+      "config",
+      "context",
+      "effort",
+      "fast",
+      "heapdump",
+      "init",
+      "mcp",
+      "import",
+      "model",
+      "__remote-workflow",
+      "workflow-launch-exec",
+      "reload-plugins",
+      "reload-skills",
+      "rename",
+      "ultrareview",
+      "security-review",
+      "usage-credits",
+      "extra-usage",
+      "usage",
+      "insights",
+      "recap",
+      "skill-doctor",
+      "goal",
+      "design-consent",
+      "design-revoke",
+      "list-agents",
+      "team-onboarding"
+    ],
+    "terminal_slash_commands": [
+      "doctor",
+      "color",
+      "reload-plugins"
+    ],
+    "apiKeySource": "none",
+    "claude_code_version": "2.1.263",
+    "output_style": "default",
+    "agents": [
+      "claude",
+      "claude-code-guide",
+      "Explore",
+      "general-purpose",
+      "learn",
+      "Plan",
+      "statusline-setup",
+      "v2-gate"
+    ],
+    "skills": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator"
+    ],
+    "plugins": [],
+    "capabilities": [
+      "interrupt_receipt_v1",
+      "interrupt_cancel_queued_v1",
+      "msg_lifecycle_v1"
+    ],
+    "analytics_disabled": false,
+    "product_feedback_disabled": false,
+    "uuid": "c40edfc5-7162-44e1-ab62-8aa3f67c6c97",
+    "memory_paths": {
+      "auto": "C:\\Users\\stama\\.claude\\projects\\C--Users-stama-winc-general-learning-mentor-experiments-fixture\\memory\\"
+    },
+    "messaging_socket_path": "\\\\.\\pipe\\LOCAL\\cc-msg-ea00346efc842781fe4161d0703aa62c",
+    "fast_mode_state": "off",
+    "powershell_path": "C:\\Users\\stama\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe"
+  },
+  "result": {
+    "duration_api_ms": 2251111,
+    "stop_reason": "end_turn",
+    "session_id": "a8db1fa2-061a-4117-9b79-c867bf0030ab",
+    "total_cost_usd": 0.054301,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 2000,
+      "cache_read_input_tokens": 19262,
+      "output_tokens": 945,
+      "output_tokens_details": {
+        "thinking_tokens": 306
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 2000,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 764,
+          "cache_read_input_tokens": 9980,
+          "cache_creation_input_tokens": 1302,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 1302
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 925,
+        "outputTokens": 20,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.001025,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5": {
+        "inputTokens": 4,
+        "outputTokens": 945,
+        "cacheReadInputTokens": 19262,
+        "cacheCreationInputTokens": 2000,
+        "webSearchRequests": 0,
+        "costUSD": 0.053276000000000004,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 306,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 3,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "両方読みました。まず**それぞれの役割だけ**一行で置きます（中身の説明はまだしません）。\n\n| ファイル | ざっくり何のためにあるか |\n|---|---|\n| `plain-date.ts` | 「時刻を持たない日付」（年・月・日だけ）を表す独自の型。文字列との相互変換もここに入っている |\n| `result.ts` | 「成功したか失敗したか」を**戻り値として**表現するための型。例外を投げる代わりに使う |\n\nその上で、答え方を決めたいので2つだけ教えてください。\n\n1. **これを読むことになったきっかけは何ですか。** 既存コードを読んでいて出てきた／自分で使おうとしている／何かエラーが出た、など。\n2. 上の2行のうち、**引っかかったのはどちらですか。** 「両方ぼんやり」でも大丈夫です。\n\nついでにもう一つ、答えられそうなら答えてください（正確じゃなくて大丈夫です。単語だけ、「たぶん〜」でも、分からないでも構いません）。\n\n> JavaScript の標準の `Date` があるのに、わざわざ `PlainDate` という自前のクラスを作っているのは、なぜだと思いますか？\n\n言葉にしてみると自分でどこが曖昧か見つかるので、その材料として聞いています。",
+    "ttft_ms": 1118129,
+    "type": "result",
+    "duration_ms": 1134687,
+    "uuid": "6916b185-d527-40aa-89e1-a229d8272aa5",
+    "ttft_stream_ms": 1117521,
+    "time_to_request_ms": 163,
+    "first_content_frame_ms": 1117521,
+    "queued_turn_count": 0
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "spec_id": "004-depth-hypothesis",
+  "実行日時": "2026-09-07T01:04:08.750395+00:00",
+  "fixture_sha": "913c103e062e05d23dfa78c980d83a65d1e3f1c1",
+  "claude_version": "2.1.263 (Claude Code)",
+  "spec": {
+    "id": "004-depth-hypothesis",
+    "reps": 5,
+    "factors": {
+      "model": [
+        "opus"
+      ],
+      "loader_kind": [
+        "list_only",
+        "explain_one",
+        "explain_two"
+      ],
+      "probe_grain": [
+        "fine"
+      ]
+    },
+    "model_factor": "model",
+    "turns": [
+      {
+        "id": "loader",
+        "vary": "loader_kind",
+        "measure": false
+      },
+      {
+        "id": "probe",
+        "vary": "probe_grain",
+        "measure": true
+      }
+    ],
+    "levels": {
+      "loader_kind": {
+        "list_only": "app/lib にどんなファイルがあるか、一覧を教えてください。\n",
+        "explain_one": "app/lib/plain-date.ts が何をしているファイルなのか教えてください。\n",
+        "explain_two": "app/lib/plain-date.ts と app/lib/result.ts が何をしているファイルなのか教えてください。\n"
+      },
+      "probe_grain": {
+        "fine": "app/lib/hash.ts の3行目に SALT_ROUNDS = 10 と書いてあるのですが、\nこの 10 が何を意味しているのか分かりません。\n"
+      }
+    }
+  },
+  "agent": "learn",
+  "agent_variant": null,
+  "既知の単純化": [
+    "--strict-mcp-config で MCP を全停止。learn.md の mcp__github-ro は無効。",
+    "--setting-sources project でユーザーグローバル設定は読み込まない。",
+    "fixture の README に『生成AIを使わないでほしい』の記述あり（全条件に等しくかかる定数）。"
+  ]
+}

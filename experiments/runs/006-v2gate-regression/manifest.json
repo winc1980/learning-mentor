@@ -1,0 +1,63 @@
+{
+  "spec_id": "006-v2gate-regression",
+  "実行日時": "2026-09-07T06:10:29.683432+00:00",
+  "fixture_sha": "913c103e062e05d23dfa78c980d83a65d1e3f1c1",
+  "claude_version": "2.1.263 (Claude Code)",
+  "spec": {
+    "id": "006-v2gate-regression",
+    "reps": 5,
+    "agent_variant": "experiments/variants/v2-gate.md",
+    "factors": {
+      "model": [
+        "opus"
+      ],
+      "context_load": [
+        "none",
+        "repo_sweep"
+      ],
+      "probe_grain": [
+        "fine",
+        "coarse"
+      ]
+    },
+    "model_factor": "model",
+    "turns": [
+      {
+        "id": "loader",
+        "vary": "context_load",
+        "measure": false
+      },
+      {
+        "id": "probe",
+        "vary": "probe_grain",
+        "measure": true
+      }
+    ],
+    "levels": {
+      "context_load": {
+        "none": "こんにちは。今日はよろしくお願いします。\n",
+        "single_file": "app/lib/plain-date.ts が何をしているファイルなのか教えてください。\n",
+        "repo_sweep": "このリポジトリ全体がどういう構成になっているのか教えてください。\nどこに何があるのか、ひととおり把握したいです。\n"
+      },
+      "probe_grain": {
+        "fine": "app/lib/hash.ts の3行目に SALT_ROUNDS = 10 と書いてあるのですが、\nこの 10 が何を意味しているのか分かりません。\n",
+        "coarse": "このアプリの認証まわりが、全体としてどう組まれているのか分かりません。\n"
+      }
+    },
+    "cell_labels": {
+      "none__fine": "A",
+      "none__coarse": "B",
+      "single_file__fine": "C",
+      "single_file__coarse": "D",
+      "repo_sweep__fine": "E",
+      "repo_sweep__coarse": "F"
+    }
+  },
+  "agent": "v2-gate",
+  "agent_variant": "experiments/variants/v2-gate.md",
+  "既知の単純化": [
+    "--strict-mcp-config で MCP を全停止。learn.md の mcp__github-ro は無効。",
+    "--setting-sources project でユーザーグローバル設定は読み込まない。",
+    "fixture の README に『生成AIを使わないでほしい』の記述あり（全条件に等しくかかる定数）。"
+  ]
+}

@@ -1,0 +1,54 @@
+# 実験 005：経路1に対するパッチ1の効果（opus / n=5）
+#
+# 004 で確定したこと：崩壊の経路は2つあり、どちらか一方で足りる。
+#   経路1  直前のターンで詳細解説を済ませている（explain_one で 0/10）
+#   経路2  広い質問が来る（002 の F で 0/10）
+#
+# 003 は coarse 条件しか見ていないため、経路2に対するパッチ2の効果しか測っていない。
+# この run は経路1に対するパッチ1（「材料の多さは、手順1を省く理由になりません」）を測る。
+#
+# 004 との差は agent_variant の1行だけ。水準テキスト・ターン構成・反復数・モデルは同一。
+# 比較対象：experiments/runs/004-depth-hypothesis（素のプロンプト）
+#
+# list_only を残してあるのは対照のため。004 で 10/10 保持だった条件が
+# v2-gate で下がっていないか（改善が退行を伴っていないか）を同一 run 内で確認する。
+
+id: 005-v2gate-path1
+reps: 5
+agent_variant: experiments/variants/v2-gate.md
+
+factors:
+  model:       [opus]
+  loader_kind: [list_only, explain_one, explain_two]
+  probe_grain: [fine]
+
+model_factor: model
+
+turns:
+  - id: loader
+    vary: loader_kind
+    measure: false
+  - id: probe
+    vary: probe_grain
+    measure: true
+
+levels:
+  loader_kind:
+    # 一覧だけを求める。詳細解説を発生させない＝深さが決まらない。
+    # 「中身の説明はいらない」とは書かない（こちらが答えを誘導してしまうため）。
+    list_only: |
+      app/lib にどんなファイルがあるか、一覧を教えてください。
+
+    # 002 の single_file と一字一句同一。C の再現条件。
+    explain_one: |
+      app/lib/plain-date.ts が何をしているファイルなのか教えてください。
+
+    # 同じ深さの詳細解説を2回させる。
+    explain_two: |
+      app/lib/plain-date.ts と app/lib/result.ts が何をしているファイルなのか教えてください。
+
+  probe_grain:
+    # 002 の fine と一字一句同一。3水準すべてでこの文のまま。
+    fine: |
+      app/lib/hash.ts の3行目に SALT_ROUNDS = 10 と書いてあるのですが、
+      この 10 が何を意味しているのか分かりません。

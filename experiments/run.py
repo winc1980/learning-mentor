@@ -101,7 +101,7 @@ def claude_bin():
     raise SystemExit("claude CLI が見つかりません")
 
 
-def run_turn(text, model, session_id, first):
+def run_turn(text, model, session_id, first, agent="learn"):
     """1ターン実行し、(init イベント, result イベント) を返す。
 
     stream-json を使う理由：最初の init イベントに、ハーネスが実際に渡した
@@ -118,7 +118,7 @@ def run_turn(text, model, session_id, first):
            "--disallowedTools", "Edit Write Bash PowerShell NotebookEdit",
            "--system-prompt-snapshot", "on"]
     if first:
-        cmd += ["--agent", "learn", "--session-id", session_id]
+        cmd += ["--agent", agent, "--session-id", session_id]
     else:
         cmd += ["--resume", session_id]
 
@@ -289,6 +289,28 @@ def main():
     if not preflight():
         return 1
 
+    # プロンプト自体を実験条件にする場合。バリアント定義を fixture の
+    # .claude/agents/ に置き、--agent でそれを選ぶ。マスターの learn.md は触らない
+    # （触ると過去の run と比較できなくなる）。
+    agent = "learn"
+    variant = spec.get("agent_variant")
+    if variant:
+        vpath = os.path.join(ROOT, variant)
+        if not os.path.exists(vpath):
+            print("NG   バリアントがありません: %s" % vpath)
+            return 1
+        with io.open(vpath, encoding="utf-8") as f:
+            vtext = f.read()
+        m = re.search(r"^name:\s*(\S+)", vtext, re.MULTILINE)
+        if not m:
+            print("NG   バリアントの frontmatter に name がありません: %s" % vpath)
+            return 1
+        agent = m.group(1)
+        dest = os.path.join(FIXTURE, ".claude", "agents", agent + ".md")
+        with io.open(dest, "w", encoding="utf-8", newline="\n") as f:
+            f.write(vtext)
+        print("バリアント使用: --agent %s （%s）" % (agent, variant))
+
     run_dir = os.path.join(RUNS, spec["id"])
     os.makedirs(os.path.join(run_dir, "cells"), exist_ok=True)
     model_factor = spec.get("model_factor", "model")
@@ -326,7 +348,15 @@ def main():
                              encoding="utf-8", newline="\n") as f:
                     f.write(text)
 
-                init, result = run_turn(text, model, session_id, first=(i == 0))
+                init, result = run_turn(text, model, session_id,
+                                        first=(i == 0), agent=agent)
+
+                # API エラーは result として返ってくる。本文にエラー文字列が入るだけなので
+                # 採点に回ると「問いが無い応答」として点が付いてしまう（実際に起きた）。
+                # ここで例外にして done.json を書かせず、--resume-run で再実行させる。
+                if result.get("is_error") or result.get("terminal_reason") == "api_error":
+                    raise RuntimeError("API エラー（turn=%s）: %s"
+                                       % (t["id"], (result.get("result") or "")[:200]))
 
                 with io.open(os.path.join(cell_dir, "raw-%s.json" % t["id"]), "w",
                              encoding="utf-8", newline="\n") as f:
@@ -361,8 +391,14 @@ def main():
             return 1
 
         rows.append(row)
-        with io.open(done, "w", encoding="utf-8", newline="\n") as f:
-            json.dump({"cell": c, "metrics_row": row}, f, ensure_ascii=False, indent=2)
+        # 失敗したセルは done.json を書かない。書いてしまうと --resume-run が
+        # 失敗セルをスキップし、欠測に気づかないまま採点へ進んでしまう。
+        # （実際に API エラーの応答が採点に回り、人格残存度1が付いたことがある）
+        if row.get("error"):
+            print("     -> done.json は書きません（--resume-run で再実行されます）")
+        else:
+            with io.open(done, "w", encoding="utf-8", newline="\n") as f:
+                json.dump({"cell": c, "metrics_row": row}, f, ensure_ascii=False, indent=2)
 
     # manifest：あとから「どういう条件で取ったデータか」を復元できるようにする
     head = subprocess.run(["git", "-C", FIXTURE, "rev-parse", "HEAD"],
@@ -377,6 +413,8 @@ def main():
             "fixture_sha": head,
             "claude_version": ver,
             "spec": spec,
+        "agent": agent,
+        "agent_variant": spec.get("agent_variant"),
             "既知の単純化": [
                 "--strict-mcp-config で MCP を全停止。learn.md の mcp__github-ro は無効。",
                 "--setting-sources project でユーザーグローバル設定は読み込まない。",

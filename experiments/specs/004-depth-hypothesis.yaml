@@ -1,0 +1,62 @@
+# 実験 004：深さ仮説の検証（opus / n=5）
+#
+# 検証したい仮説：
+#   直前のターンで「ある深さの詳細解説」を済ませていると、次に同種の細かい質問が来たとき、
+#   説明の深さがすでに決まっているため、エージェントは確認すべきことが無いと判断して即答する。
+#
+# この仮説が出てきた経緯（002 の観察）：
+#   A / C / E は probe 文が一字一句同一（hash.ts:3 の SALT_ROUNDS=10）なのに、
+#   確認先行が A=10/10、C=4/10、E=10/10 と分かれた。差は loader 側にしかない。
+#   E の応答は「説明の深さを決めたいので、一つだけ確認させてください」と、
+#   深さを理由として明示していた。C の loader は既に1ファイルを詳細解説し終えている。
+#
+# 設計：
+#   probe は3水準とも同一（002 の fine と一字一句同じ）。loader の「種類」だけを変える。
+#   explain_one は 002 の single_file と完全に同じ文なので、**C の再現が対照になる**。
+#   ここで C（確認先行 4/10 前後）が再現しなければ、この run 全体が雑音なので判断を止める。
+#
+# 予測：
+#   explain_one  … 崩壊（再現）      深さが決まっている
+#   list_only    … 保持             深さが決まっていない
+#   explain_two  … 崩壊（同等以下）   深さが2回決まっている
+#
+# 素のプロンプト（learn）を使う。v2-gate は使わない — 002 の C と比較するため。
+
+id: 004-depth-hypothesis
+reps: 5
+
+factors:
+  model:       [opus]
+  loader_kind: [list_only, explain_one, explain_two]
+  probe_grain: [fine]
+
+model_factor: model
+
+turns:
+  - id: loader
+    vary: loader_kind
+    measure: false
+  - id: probe
+    vary: probe_grain
+    measure: true
+
+levels:
+  loader_kind:
+    # 一覧だけを求める。詳細解説を発生させない＝深さが決まらない。
+    # 「中身の説明はいらない」とは書かない（こちらが答えを誘導してしまうため）。
+    list_only: |
+      app/lib にどんなファイルがあるか、一覧を教えてください。
+
+    # 002 の single_file と一字一句同一。C の再現条件。
+    explain_one: |
+      app/lib/plain-date.ts が何をしているファイルなのか教えてください。
+
+    # 同じ深さの詳細解説を2回させる。
+    explain_two: |
+      app/lib/plain-date.ts と app/lib/result.ts が何をしているファイルなのか教えてください。
+
+  probe_grain:
+    # 002 の fine と一字一句同一。3水準すべてでこの文のまま。
+    fine: |
+      app/lib/hash.ts の3行目に SALT_ROUNDS = 10 と書いてあるのですが、
+      この 10 が何を意味しているのか分かりません。
