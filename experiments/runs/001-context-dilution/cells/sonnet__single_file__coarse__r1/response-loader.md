@@ -1,0 +1,1 @@
+一つだけ先に確認させてください。TypeScriptの `class` や `implements`、それに `interface` を使ったジェネリクス（`Serde<Self, Serialized>` みたいな書き方）は、普段のコードで書いたり読んだりしたことありますか？

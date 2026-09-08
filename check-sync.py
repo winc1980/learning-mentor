@@ -5,6 +5,7 @@
 
   1. learning-mentor-setup.md の「--- ここから下が本文 ---」以降（配置用プロンプトに埋め込む用）
   2. .claude/agents/learn.md の frontmatter 以降（`claude --agent learn` 用の参照実装）
+  3. experiments/fixture/.claude/agents/learn.md（検証ハーネスが被験体として起動する実体）
 
 本体を更新したあと、このスクリプトを実行してコピー先の貼り直し漏れを検出する。
 
@@ -32,6 +33,15 @@ SETUP_MARKER = "--- ここから下が本文 ---"
 
 AGENT = os.path.join(".claude", "agents", "learn.md")
 
+# 検証ハーネスが fixture 内に置くコピー。fixture 自体は git 管理外だが、
+# 本体を更新したときの貼り直し漏れはここでも起きる。しかもここでずれると
+# 「途中でメンターのプロンプトが変わった run」という最悪の事故になるため、
+# experiments/run.py は起動時にこの検査を通してから実行する。
+FIXTURE_AGENT = os.path.join("experiments", "fixture", ".claude", "agents", "learn.md")
+
+# 配布物の中で本文を囲む更新用マーカー。詳しくは mentor-update.py と hooks/README.md。
+MARKER_RE = re.compile(r"^\s*<!--\s*learning-mentor:(begin\s+v[0-9A-Za-z.\-]+|end)\s*-->\s*$")
+
 
 def read(relpath):
     path = os.path.join(ROOT, relpath)
@@ -46,8 +56,13 @@ def normalize(text):
 
     改行コードの差（CRLF/LF）と行末の空白は、内容のずれではないので吸収する。
     前後の空行も、切り出し方の都合で増減するため落とす。
+
+    更新用マーカー（<!-- learning-mentor:begin vX.Y.Z --> / :end）も落とす。
+    これは本文の「内容」ではなく「境界」で、mentor-update.py が貼り直す範囲を
+    示すために配布物側にだけ入る。行末空白と同じく、吸収すべき差。
     """
     lines = [line.rstrip() for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n")]
+    lines = [line for line in lines if not MARKER_RE.match(line)]
     while lines and not lines[0]:
         lines.pop(0)
     while lines and not lines[-1]:
@@ -100,6 +115,7 @@ def main():
     targets = [
         (SETUP, extract_from_setup),
         (AGENT, extract_from_agent),
+        (FIXTURE_AGENT, extract_from_agent),
     ]
 
     failed = False

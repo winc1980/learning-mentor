@@ -1,0 +1,220 @@
+{
+  "init": {
+    "type": "system",
+    "subtype": "init",
+    "cwd": "C:\\Users\\stama\\winc\\general\\learning-mentor\\experiments\\fixture",
+    "session_id": "9fc94ddd-dd85-4535-a6d1-9a3a4fc48eb4",
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "mcp_servers": [],
+    "model": "claude-opus-5",
+    "permissionMode": "default",
+    "slash_commands": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator",
+      "advisor",
+      "agents",
+      "auto-mode-setup",
+      "autocompact",
+      "clear",
+      "color",
+      "compact",
+      "config",
+      "context",
+      "effort",
+      "fast",
+      "heapdump",
+      "init",
+      "mcp",
+      "import",
+      "model",
+      "__remote-workflow",
+      "workflow-launch-exec",
+      "reload-plugins",
+      "reload-skills",
+      "rename",
+      "ultrareview",
+      "security-review",
+      "usage-credits",
+      "extra-usage",
+      "usage",
+      "insights",
+      "recap",
+      "skill-doctor",
+      "goal",
+      "design-consent",
+      "design-revoke",
+      "list-agents",
+      "team-onboarding"
+    ],
+    "terminal_slash_commands": [
+      "doctor",
+      "color",
+      "reload-plugins"
+    ],
+    "apiKeySource": "none",
+    "claude_code_version": "2.1.263",
+    "output_style": "default",
+    "agents": [
+      "claude",
+      "claude-code-guide",
+      "Explore",
+      "general-purpose",
+      "learn",
+      "Plan",
+      "statusline-setup",
+      "v2-gate"
+    ],
+    "skills": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator"
+    ],
+    "plugins": [],
+    "capabilities": [
+      "interrupt_receipt_v1",
+      "interrupt_cancel_queued_v1",
+      "msg_lifecycle_v1"
+    ],
+    "analytics_disabled": false,
+    "product_feedback_disabled": false,
+    "uuid": "826fa3dc-f679-447d-87ca-6c0e9eb54015",
+    "memory_paths": {
+      "auto": "C:\\Users\\stama\\.claude\\projects\\C--Users-stama-winc-general-learning-mentor-experiments-fixture\\memory\\"
+    },
+    "messaging_socket_path": "\\\\.\\pipe\\LOCAL\\cc-msg-2e99a2962471767c31b0a459cb9dc9bb",
+    "fast_mode_state": "off",
+    "powershell_path": "C:\\Users\\stama\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe"
+  },
+  "result": {
+    "duration_api_ms": 22298,
+    "stop_reason": "end_turn",
+    "session_id": "9fc94ddd-dd85-4535-a6d1-9a3a4fc48eb4",
+    "total_cost_usd": 0.072639,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 2287,
+      "cache_read_input_tokens": 36048,
+      "output_tokens": 1269,
+      "output_tokens_details": {
+        "thinking_tokens": 820
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 2287,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1052,
+          "cache_read_input_tokens": 18965,
+          "cache_creation_input_tokens": 405,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 405
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5": {
+        "inputTokens": 4,
+        "outputTokens": 1269,
+        "cacheReadInputTokens": 36048,
+        "cacheCreationInputTokens": 2287,
+        "webSearchRequests": 0,
+        "costUSD": 0.072639,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 820,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 2,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "`app/lib/hash.ts` 読みました。3行目ですね。\n\n答えを言う前に、**どこから話し始めるか**を決めたいので、一つだけ聞かせてください。\n\n> 正確じゃなくて大丈夫です。単語だけでも、「たぶん〜」でも構いません。**言葉にすると自分でどこが曖昧か見つかる**ので、その材料として聞いています。\n\nこの `SALT_ROUNDS` という名前は「salt（ソルト）」＋「rounds（回数）」でできています。**あなたの理解が止まるのは、次のどのあたりですか。**\n\n- **①** そもそも「パスワードをハッシュ化する」が何をすることなのか曖昧\n- **②** ハッシュ化はなんとなく分かるけど、「ソルト」が何なのか分からない\n- **③** ソルトも分かる。でも、それに「回数」が付くのが分からない\n- **④** 分からない／どれとも言えない\n\n「④」でもまったく問題ありません。番号だけ返してもらえれば大丈夫です。",
+    "ttft_ms": 3144,
+    "type": "result",
+    "duration_ms": 22519,
+    "uuid": "e3ac159a-4019-49f7-bb59-86d4d57806e3",
+    "ttft_stream_ms": 1002,
+    "time_to_request_ms": 80,
+    "first_content_frame_ms": 1731,
+    "queued_turn_count": 0
+  }
+}

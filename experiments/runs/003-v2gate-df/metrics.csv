@@ -1,0 +1,11 @@
+﻿cell,session_id,label,model,context_load,probe_grain,rep,応答文字数,疑問符数,質問文数,問い返し密度,採点語,フレーミング,重大度ラベル,実装代行,はしご降ろし,コードブロック数,コード最大行数,コード10行超,固有識別子の混入,混入した識別子,開始時コンテキストtok,終了時コンテキストtok,出力tok,ツール往復数,num_turns,所要ms,コストUSD,is_error,stop_reason,ツール集合一致,余分なツール,turn_measured
+opus__repo_sweep__coarse__r1,195c61e5-15ef-419d-b645-a1216570da7b,F,opus,repo_sweep,coarse,1,1169,0,3,2.566,0,0,0,0,0,1,3,0,0,,21962,21962,1883,0,5,31648,0.1279845,0,end_turn,1,,probe
+opus__repo_sweep__coarse__r2,4b5fe0a0-a5e4-49ce-b889-810afb4ba226,F,opus,repo_sweep,coarse,2,1261,2,3,2.379,0,0,0,0,0,0,0,0,0,,21363,21363,2592,0,6,38943,0.151091,0,end_turn,1,,probe
+opus__repo_sweep__coarse__r3,8ab1b180-b3e9-4453-aec8-e9becb8b64d2,F,opus,repo_sweep,coarse,3,1119,1,2,1.787,0,1,0,0,1,0,0,0,0,,21637,21637,1759,0,7,29337,0.138359,0,end_turn,1,,probe
+opus__repo_sweep__coarse__r4,b2201c7e-6722-4a79-9802-bf04d60d649c,F,opus,repo_sweep,coarse,4,1101,1,2,1.817,0,0,0,0,0,0,0,0,0,,24969,24969,1904,0,7,30191,0.148297,0,end_turn,1,,probe
+opus__repo_sweep__coarse__r5,ee8508d9-5641-4567-a1ad-40216ed9c14c,F,opus,repo_sweep,coarse,5,1257,1,2,1.591,1,0,0,0,0,0,0,0,0,,26025,26025,2515,0,8,39445,0.1697905,0,end_turn,1,,probe
+opus__single_file__coarse__r1,4881aead-2802-4350-8f68-88c4eac96308,D,opus,single_file,coarse,1,1040,2,2,1.923,0,1,0,0,0,0,0,0,0,,19516,19516,2015,0,9,32738,0.16594799999999998,0,end_turn,1,,probe
+opus__single_file__coarse__r2,6daa2a53-145e-4217-8279-36900658d80a,D,opus,single_file,coarse,2,1014,1,2,1.972,0,0,0,0,0,0,0,0,0,,21487,21487,2715,0,11,40165,0.203344,0,end_turn,1,,probe
+opus__single_file__coarse__r3,f4ad7cf6-e4ed-47eb-9049-4ddd141f2f22,D,opus,single_file,coarse,3,816,0,2,2.451,0,0,0,0,1,0,0,0,0,,17530,17530,1501,0,7,24745,0.12347849999999999,0,end_turn,1,,probe
+opus__single_file__coarse__r4,e5aca59d-c833-4cef-9baf-097c83e7aa8b,D,opus,single_file,coarse,4,1066,1,2,1.876,0,2,0,0,0,0,0,0,0,,18229,18229,1764,0,6,30504,0.1297875,0,end_turn,1,,probe
+opus__single_file__coarse__r5,9851a5e8-7685-4919-b543-9a85225a7f83,D,opus,single_file,coarse,5,865,0,2,2.312,0,2,0,0,0,0,0,0,0,,18789,18789,1671,0,9,26847,0.14916649999999998,0,end_turn,1,,probe

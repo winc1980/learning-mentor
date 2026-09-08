@@ -1,0 +1,14 @@
+{
+  "ca010332": "sonnet__repo_sweep__fine__r1",
+  "47fc055b": "sonnet__single_file__coarse__r1",
+  "bdbc9d15": "sonnet__single_file__fine__r1",
+  "f3b3532a": "sonnet__repo_sweep__coarse__r1",
+  "60b7faf4": "sonnet__none__fine__r1",
+  "5cbd3217": "opus__repo_sweep__fine__r1",
+  "55f8e75c": "opus__none__coarse__r1",
+  "dd4aa317": "opus__single_file__fine__r1",
+  "b971ab33": "opus__single_file__coarse__r1",
+  "6ab8efe8": "opus__none__fine__r1",
+  "0540e84b": "sonnet__none__coarse__r1",
+  "8aa8c809": "opus__repo_sweep__coarse__r1"
+}

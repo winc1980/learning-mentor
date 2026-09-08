@@ -1,0 +1,220 @@
+{
+  "init": {
+    "type": "system",
+    "subtype": "init",
+    "cwd": "C:\\Users\\stama\\winc\\general\\learning-mentor\\experiments\\fixture",
+    "session_id": "c05c2faa-7c67-4bde-a91b-8ee03d5d6e4c",
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "mcp_servers": [],
+    "model": "claude-opus-5",
+    "permissionMode": "default",
+    "slash_commands": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator",
+      "advisor",
+      "agents",
+      "auto-mode-setup",
+      "autocompact",
+      "clear",
+      "color",
+      "compact",
+      "config",
+      "context",
+      "effort",
+      "fast",
+      "heapdump",
+      "init",
+      "mcp",
+      "import",
+      "model",
+      "__remote-workflow",
+      "workflow-launch-exec",
+      "reload-plugins",
+      "reload-skills",
+      "rename",
+      "ultrareview",
+      "security-review",
+      "usage-credits",
+      "extra-usage",
+      "usage",
+      "insights",
+      "recap",
+      "skill-doctor",
+      "goal",
+      "design-consent",
+      "design-revoke",
+      "list-agents",
+      "team-onboarding"
+    ],
+    "terminal_slash_commands": [
+      "doctor",
+      "color",
+      "reload-plugins"
+    ],
+    "apiKeySource": "none",
+    "claude_code_version": "2.1.263",
+    "output_style": "default",
+    "agents": [
+      "claude",
+      "claude-code-guide",
+      "Explore",
+      "general-purpose",
+      "learn",
+      "Plan",
+      "statusline-setup",
+      "v2-gate"
+    ],
+    "skills": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator"
+    ],
+    "plugins": [],
+    "capabilities": [
+      "interrupt_receipt_v1",
+      "interrupt_cancel_queued_v1",
+      "msg_lifecycle_v1"
+    ],
+    "analytics_disabled": false,
+    "product_feedback_disabled": false,
+    "uuid": "19f41beb-c0b1-4da8-9f06-6ce91611a637",
+    "memory_paths": {
+      "auto": "C:\\Users\\stama\\.claude\\projects\\C--Users-stama-winc-general-learning-mentor-experiments-fixture\\memory\\"
+    },
+    "messaging_socket_path": "\\\\.\\pipe\\LOCAL\\cc-msg-d0230e21e31be3e9e653d6c9497c138c",
+    "fast_mode_state": "off",
+    "powershell_path": "C:\\Users\\stama\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe"
+  },
+  "result": {
+    "duration_api_ms": 35753,
+    "stop_reason": "end_turn",
+    "session_id": "c05c2faa-7c67-4bde-a91b-8ee03d5d6e4c",
+    "total_cost_usd": 0.0830775,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 2309,
+      "cache_read_input_tokens": 23385,
+      "output_tokens": 1931,
+      "output_tokens_details": {
+        "thinking_tokens": 547
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 2309,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1745,
+          "cache_read_input_tokens": 12660,
+          "cache_creation_input_tokens": 374,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 374
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-opus-5": {
+        "inputTokens": 4,
+        "outputTokens": 1931,
+        "cacheReadInputTokens": 23385,
+        "cacheCreationInputTokens": 2309,
+        "webSearchRequests": 0,
+        "costUSD": 0.0830775,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 547,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 2,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "`app/lib/hash.ts` を読みました。パスワードのハッシュ化まわりですね。\n\n（ハッシュ化＝元に戻せない変換をかけて保存する、という前提で進めます。もしそこが怪しければ言ってください、戻ります）\n\n## `10` は「桁数」でも「塩の量」でもありません\n\nいちばん大事なところから言うと、この `10` は **回数の指数**です。\n\n実際の計算回数は **2の10乗 = 1024回**。もし `11` にすれば 2048回、`12` なら 4096回。**1増やすと計算量が2倍になります。**\n\nbcrypt の世界ではこの値を **コストファクタ（cost factor）** と呼びます。変数名が `SALT_ROUNDS` になっているのは bcrypt ライブラリの慣習的な呼び方なのですが、正直あまり良い名前ではありません。「ソルトを10個作る」とか「10文字のソルト」ではないので、そこは切り離して考えてください。\n\n## なぜ「わざと遅くする」のか\n\nここが一番の「なぜ」です。\n\n普通、アルゴリズムは速いほうが良いですよね。ハッシュだけは逆で、**遅いことが目的**です。\n\n理由は、攻撃者の立場に立つと見えます。仮にDBが漏れて、パスワードハッシュの一覧が盗まれたとします。攻撃者がやるのは「よく使われるパスワード候補を片っ端からハッシュ化して、盗んだハッシュと一致するか試す」という総当たりです。\n\n- ハッシュ計算が **0.001秒** なら → 1秒で1000個試せる\n- ハッシュ計算が **0.1秒** なら → 1秒で10個しか試せない\n\n正規のユーザーにとっては「ログインが0.1秒遅い」だけですが、攻撃者にとっては **総当たりにかかる時間が100倍**になります。この非対称性を意図的に作るための数字が、この `10` です。\n\nそして「2倍ずつ」という指数の形になっているのは、**ハードウェアの進化に追従できるようにするため**です。マシンが速くなったら、コストを1つ上げるだけで元の防御力に戻せる。設定を書き換えずに済むよう最初から指数で設計されている、というわけです。\n\n## `10` は「正しい値」なのか\n\nこれは設計判断なので、決めるのは開発者です。判断材料だけ置きます。\n\n| 観点 | 内容 |\n|---|---|\n| 目安 | 「自分のサーバーで1回のハッシュ化に **50〜250ms 程度**」に収まる値、というのが一般的な指針 |\n| 現在の相場 | 10 は bcrypt ライブラリのデフォルト付近。近年は **12** を推奨する意見も多い |\n| トレードオフ | 上げすぎるとログインAPIが重くなり、**大量のログイン試行がそのままサーバー負荷攻撃になる**（DoS になりうる） |\n\nなので「大きいほど安全」ではなく、**自分のサーバーの実測値を見て決める**のが筋です。手元で `10` と `12` の実行時間を測ってみると、体感がつかめると思います。\n\n---\n\nひとつ、予測してみてほしいことがあります。**当たり外れは気にしなくていいです。「たぶん」で構いません。**\n\n`hashPassword` は `SALT_ROUNDS` を渡していますが、`compareHashedPassword`（13行目）は **コストもソルトも一切渡していません**。それでも正しく照合できています。\n\n**なぜ、渡さなくても照合できるんだと思いますか？**\n\n（ヒントが要るなら、実際に生成されたハッシュ文字列を1つ `console.log` して眺めてみてください。答えはその文字列の中にあります）",
+    "ttft_ms": 3333,
+    "type": "result",
+    "duration_ms": 35867,
+    "uuid": "8ce41e87-42a9-4e7b-bb29-f195d6690d06",
+    "ttft_stream_ms": 1072,
+    "time_to_request_ms": 46,
+    "first_content_frame_ms": 1839,
+    "queued_turn_count": 0
+  }
+}

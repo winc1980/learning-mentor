@@ -1,0 +1,234 @@
+{
+  "init": {
+    "type": "system",
+    "subtype": "init",
+    "cwd": "C:\\Users\\stama\\winc\\general\\learning-mentor\\experiments\\fixture",
+    "session_id": "c7bc60bd-2f69-4005-8cc6-d7dcb521f1fb",
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "mcp_servers": [],
+    "model": "claude-opus-5",
+    "permissionMode": "default",
+    "slash_commands": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator",
+      "advisor",
+      "agents",
+      "auto-mode-setup",
+      "autocompact",
+      "clear",
+      "color",
+      "compact",
+      "config",
+      "context",
+      "effort",
+      "fast",
+      "heapdump",
+      "init",
+      "mcp",
+      "import",
+      "model",
+      "__remote-workflow",
+      "workflow-launch-exec",
+      "reload-plugins",
+      "reload-skills",
+      "rename",
+      "ultrareview",
+      "security-review",
+      "usage-credits",
+      "extra-usage",
+      "usage",
+      "insights",
+      "recap",
+      "skill-doctor",
+      "goal",
+      "design-consent",
+      "design-revoke",
+      "list-agents",
+      "team-onboarding"
+    ],
+    "terminal_slash_commands": [
+      "doctor",
+      "color",
+      "reload-plugins"
+    ],
+    "apiKeySource": "none",
+    "claude_code_version": "2.1.263",
+    "output_style": "default",
+    "agents": [
+      "claude",
+      "claude-code-guide",
+      "Explore",
+      "general-purpose",
+      "learn",
+      "Plan",
+      "statusline-setup",
+      "v2-gate"
+    ],
+    "skills": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator"
+    ],
+    "plugins": [],
+    "capabilities": [
+      "interrupt_receipt_v1",
+      "interrupt_cancel_queued_v1",
+      "msg_lifecycle_v1"
+    ],
+    "analytics_disabled": false,
+    "product_feedback_disabled": false,
+    "uuid": "c89d2218-f743-444c-ad5a-4788fc799207",
+    "memory_paths": {
+      "auto": "C:\\Users\\stama\\.claude\\projects\\C--Users-stama-winc-general-learning-mentor-experiments-fixture\\memory\\"
+    },
+    "messaging_socket_path": "\\\\.\\pipe\\LOCAL\\cc-msg-dc930c77f0c14bfcb0a85c3fdecedfcd",
+    "fast_mode_state": "off",
+    "powershell_path": "C:\\Users\\stama\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe"
+  },
+  "result": {
+    "duration_api_ms": 21846,
+    "stop_reason": "end_turn",
+    "session_id": "c7bc60bd-2f69-4005-8cc6-d7dcb521f1fb",
+    "total_cost_usd": 0.050715,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 1476,
+      "cache_read_input_tokens": 19256,
+      "output_tokens": 1012,
+      "output_tokens_details": {
+        "thinking_tokens": 402
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 1476,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 912,
+          "cache_read_input_tokens": 9974,
+          "cache_creation_input_tokens": 784,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 784
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 917,
+        "outputTokens": 18,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.0010069999999999999,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5": {
+        "inputTokens": 4,
+        "outputTokens": 1012,
+        "cacheReadInputTokens": 19256,
+        "cacheCreationInputTokens": 1476,
+        "webSearchRequests": 0,
+        "costUSD": 0.049708,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 402,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 2,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "読みました。60行くらいの小さいファイルで、中身は大きく4つのパーツに分かれています。**まずは場所だけ挙げます（中身の説明はまだしません）。**\n\n| # | パーツ | 行 |\n|---|---|---|\n| 1 | `PlainDateLike` 型 — year / month / day の3つを持つ形の定義 | 3–7 |\n| 2 | `PlainDate` クラス本体とコンストラクタ | 9–12, 35–49 |\n| 3 | `static serde` — 文字列との相互変換 | 14–33 |\n| 4 | `static now()` — 今日の日付を作る | 51–58 |\n\n一言でいうと「**年月日だけを持つ日付**を表す自前のクラス」です。ここから先、どこを掘るかを決めたいので2つだけ教えてください。\n\n**1つめ：** このファイルを見ることになったきっかけは何ですか。どこかで `PlainDate` が使われているのを見た、とか、エラーが出た、とか、単に全体を読んでいる途中、とか。\n\n**2つめ：** 正確じゃなくて大丈夫です。単語だけでも「たぶん〜」でも、途中で止まっても構いません。言葉にすると自分でどこが曖昧か見つかるので、その材料として聞いています。\n\n上の表で、**いま一番気になっている／一番ピンと来ていないのはどれですか。** 番号だけでいいですし、「全部ぼんやり」でも大丈夫です。",
+    "ttft_ms": 1906,
+    "type": "result",
+    "duration_ms": 20699,
+    "uuid": "5571a664-5c59-4908-8b79-d77512c7891f",
+    "ttft_stream_ms": 1129,
+    "time_to_request_ms": 72,
+    "first_content_frame_ms": 1134,
+    "queued_turn_count": 0
+  }
+}

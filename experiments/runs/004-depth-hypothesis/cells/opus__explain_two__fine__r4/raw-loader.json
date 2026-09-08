@@ -1,0 +1,234 @@
+{
+  "init": {
+    "type": "system",
+    "subtype": "init",
+    "cwd": "C:\\Users\\stama\\winc\\general\\learning-mentor\\experiments\\fixture",
+    "session_id": "31831fa6-2f6e-4090-8bb6-8ad54f411e14",
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "mcp_servers": [],
+    "model": "claude-opus-5",
+    "permissionMode": "default",
+    "slash_commands": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator",
+      "advisor",
+      "agents",
+      "auto-mode-setup",
+      "autocompact",
+      "clear",
+      "color",
+      "compact",
+      "config",
+      "context",
+      "effort",
+      "fast",
+      "heapdump",
+      "init",
+      "mcp",
+      "import",
+      "model",
+      "__remote-workflow",
+      "workflow-launch-exec",
+      "reload-plugins",
+      "reload-skills",
+      "rename",
+      "ultrareview",
+      "security-review",
+      "usage-credits",
+      "extra-usage",
+      "usage",
+      "insights",
+      "recap",
+      "skill-doctor",
+      "goal",
+      "design-consent",
+      "design-revoke",
+      "list-agents",
+      "team-onboarding"
+    ],
+    "terminal_slash_commands": [
+      "doctor",
+      "color",
+      "reload-plugins"
+    ],
+    "apiKeySource": "none",
+    "claude_code_version": "2.1.263",
+    "output_style": "default",
+    "agents": [
+      "claude",
+      "claude-code-guide",
+      "Explore",
+      "general-purpose",
+      "learn",
+      "Plan",
+      "statusline-setup",
+      "v2-gate"
+    ],
+    "skills": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator"
+    ],
+    "plugins": [],
+    "capabilities": [
+      "interrupt_receipt_v1",
+      "interrupt_cancel_queued_v1",
+      "msg_lifecycle_v1"
+    ],
+    "analytics_disabled": false,
+    "product_feedback_disabled": false,
+    "uuid": "dcb73b18-c665-4095-bfa5-ef2493039f50",
+    "memory_paths": {
+      "auto": "C:\\Users\\stama\\.claude\\projects\\C--Users-stama-winc-general-learning-mentor-experiments-fixture\\memory\\"
+    },
+    "messaging_socket_path": "\\\\.\\pipe\\LOCAL\\cc-msg-cd9218b9f8585ee3786830aa8df32fe8",
+    "fast_mode_state": "off",
+    "powershell_path": "C:\\Users\\stama\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe"
+  },
+  "result": {
+    "duration_api_ms": 32900,
+    "stop_reason": "end_turn",
+    "session_id": "31831fa6-2f6e-4090-8bb6-8ad54f411e14",
+    "total_cost_usd": 0.0841055,
+    "usage": {
+      "input_tokens": 6,
+      "cache_creation_input_tokens": 2726,
+      "cache_read_input_tokens": 28531,
+      "output_tokens": 1661,
+      "output_tokens_details": {
+        "thinking_tokens": 353
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 2726,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1044,
+          "cache_read_input_tokens": 10610,
+          "cache_creation_input_tokens": 727,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 727
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 925,
+        "outputTokens": 20,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.001025,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-opus-5": {
+        "inputTokens": 6,
+        "outputTokens": 1661,
+        "cacheReadInputTokens": 28531,
+        "cacheCreationInputTokens": 2726,
+        "webSearchRequests": 0,
+        "costUSD": 0.0830805,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 353,
+        "canonicalModel": "claude-opus-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 5,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "両方読みました。まず**それぞれ一言で何のためにあるか**だけ先に置きます。細かい中身は、そのあと知りたい方から掘りましょう。\n\n---\n\n## plain-date.ts ── 「時刻のない日付」を表すための型\n\nJavaScript の `Date` は、日付だけを扱いたいときでも必ず**時刻とタイムゾーンがくっついてきます**。「2026年9月7日」と言いたいだけなのに、実体は「協定世界時の何時何分何秒」です。\n\nそのせいで起きるのが、たとえばこういうこと：\n\n- 誕生日を保存したら、環境によって1日ずれる\n- 「同じ日か？」を比べたいのに、時刻が違うので一致しない\n\nこのファイルは、その面倒を避けるために **year / month / day の3つの数字だけを持つ自前の型**を用意しています。時刻もタイムゾーンも最初から存在しないので、ずれようがない、という発想です。\n\nついでに、その型を**文字列に変換したり、文字列から復元したり**する仕組み（`serde`）と、生成時に「月が13」みたいな変な値を弾くチェックも入っています。\n\n---\n\n## result.ts ── 「失敗するかもしれない処理」の結果を表す型\n\nこちらは日付とは無関係で、**エラーの扱い方**の話です。\n\n普通の JavaScript だと、失敗は `throw` で伝えます。でも `throw` には弱点があって、**関数の型を見ても「これは失敗しうる」と分からない**んです。だから呼ぶ側が try/catch を書き忘れても、TypeScript は何も言ってくれません。\n\nそこでこのファイルは、**失敗を「投げる」のではなく「返す」**方式にしています。成功なら `Success`（中に値が入っている）、失敗なら `Fail`（中にエラーが入っている）を返す。戻り値の型が `Result<T, E>` になるので、**呼ぶ側は成功か失敗かを確認しないと中身を取り出せません**。型で強制される、というのが狙いです。\n\nRust や Go のエラーハンドリングを TypeScript に持ち込んだ形、と言うと通じるかもしれません。\n\n---\n\nここで一つだけ確認させてください（レベルを決め打ちしたくないので）。\n\n**`Result` 型みたいな「エラーを戻り値で返す」やり方は、これまでに見たり書いたりしたことはありますか？** Rust / Go / fp-ts あたりでも構いません。\n\n「ない」なら `result.ts` から、`throw` と何がどう違うのかを具体例で見ていくのが良さそうです。「ある」なら、この実装ならではの選択（`success` フィールドで判別している点、`BaseError` を型パラメータで縛っている点あたり）の話に進めます。",
+    "ttft_ms": 1333,
+    "type": "result",
+    "duration_ms": 32024,
+    "uuid": "1d04fe25-94fc-4585-8bb8-879a94cb7cfd",
+    "ttft_stream_ms": 943,
+    "time_to_request_ms": 50,
+    "first_content_frame_ms": 944,
+    "queued_turn_count": 0
+  }
+}

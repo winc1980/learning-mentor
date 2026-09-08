@@ -1,0 +1,65 @@
+# 実験 001：コンテキスト希釈
+#
+# 仮説：直前のターンで大量のファイル読み込みが起きると、メンタープロンプトの
+#       遵守が低下する（口調が消えて通常の Claude の解説になる）。
+#       これは投げた質問の粒度とは独立の効果である。
+#
+# 設計の要：probe ターンの文面は context_load の3水準すべてで一字一句同一。
+#           よって probe の応答に出た差は、直前のコンテキスト状態にしか帰属しない。
+#
+# 題材の統制：fine / coarse はどちらも「認証まわり」の話に揃えてある。
+#             粒度だけを動かし、題材の難しさが混ざらないようにするため。
+
+id: 001-context-dilution
+reps: 1          # まず n=1 で全セル。効果量とコストを実測してから n を決める
+
+factors:
+  # 実行順も兼ねる（軽い条件を先に流し、途中で止められるようにする）
+  model:        [sonnet, opus]
+  context_load: [none, single_file, repo_sweep]
+  probe_grain:  [fine, coarse]
+
+# どの要因が --model に渡る値か
+model_factor: model
+
+turns:
+  - id: loader
+    vary: context_load
+    measure: false      # 負荷をかけるだけ。採点対象にしない
+  - id: probe
+    vary: probe_grain
+    measure: true       # ここだけを採点する
+
+levels:
+  context_load:
+    # 読み込みをほぼ発生させない
+    none: |
+      こんにちは。今日はよろしくお願いします。
+
+    # 1ファイルだけ。認証とは無関係の題材にして、probe を先読みさせない
+    single_file: |
+      app/lib/plain-date.ts が何をしているファイルなのか教えてください。
+
+    # 大量の Read/Grep を誘発させる。ユーザーが実地で希釈を観測したのがこの形
+    repo_sweep: |
+      このリポジトリ全体がどういう構成になっているのか教えてください。
+      どこに何があるのか、ひととおり把握したいです。
+
+  probe_grain:
+    # 1行・1定数に閉じた質問
+    fine: |
+      app/lib/hash.ts の3行目に SALT_ROUNDS = 10 と書いてあるのですが、
+      この 10 が何を意味しているのか分かりません。
+
+    # 同じ認証ドメインだが、複数ファイルを横断しないと答えられない
+    coarse: |
+      このアプリの認証まわりが、全体としてどう組まれているのか分かりません。
+
+# レポート用の短いラベル（context_load × probe_grain）
+cell_labels:
+  none__fine:         A
+  none__coarse:       B
+  single_file__fine:  C
+  single_file__coarse: D
+  repo_sweep__fine:   E
+  repo_sweep__coarse: F

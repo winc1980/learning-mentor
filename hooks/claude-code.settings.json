@@ -1,0 +1,17 @@
+{
+  "_comment": "Claude Code 用。~/.claude/settings.json または <repo>/.claude/settings.json の hooks に統合する。command のパスは mentor-update.py の実際の場所に書き換えること。",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$HOME/learning-mentor/mentor-update.py\" --hook",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "cell": {
+    "model": "sonnet",
+    "context_load": "single_file",
+    "probe_grain": "coarse",
+    "id": "sonnet__single_file__coarse__r1",
+    "rep": 1
+  },
+  "metrics_row": {
+    "cell": "sonnet__single_file__coarse__r1",
+    "session_id": "6abbe992-a59f-4ff1-b1b9-e13591a9805f",
+    "label": "D",
+    "model": "sonnet",
+    "context_load": "single_file",
+    "probe_grain": "coarse",
+    "rep": 1,
+    "応答文字数": 162,
+    "疑問符数": 2,
+    "問い返し密度": 12.346,
+    "採点語": 0,
+    "フレーミング": 0,
+    "重大度ラベル": 0,
+    "実装代行": 0,
+    "はしご降ろし": 1,
+    "コードブロック数": 0,
+    "コード最大行数": 0,
+    "コード10行超": 0,
+    "固有識別子の混入": 0,
+    "混入した識別子": "",
+    "開始時コンテキストtok": 21090,
+    "終了時コンテキストtok": 21090,
+    "出力tok": 2465,
+    "ツール往復数": 0,
+    "num_turns": 7,
+    "所要ms": 36781,
+    "コストUSD": 0.0673156,
+    "is_error": 0,
+    "stop_reason": "end_turn",
+    "ツール集合一致": 1,
+    "余分なツール": "",
+    "turn_measured": "probe"
+  }
+}

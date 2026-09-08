@@ -1,0 +1,85 @@
+name: release
+
+# v1.2.0 のようなタグを push すると、配布物を固めた zip を添えて Release を作る。
+#
+# 関門を2つ置いてある。どちらも「気づかないまま壊れたものを配る」のを防ぐためのもの。
+#   1. VERSION ファイルとタグが一致しているか
+#      → 配置先は本文中のマーカーでバージョンを名乗るので、ここがずれると
+#         「v1.2.0 と名乗る v1.1.0 の本文」が出回る
+#   2. check-sync.py が通るか
+#      → 本文のコピーがずれたまま配ると、受け取った側は何のエラーも見ずに
+#         別物のメンターを使うことになる
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: タグと VERSION が一致しているか
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          file="$(cat VERSION | tr -d '[:space:]')"
+          if [ "$tag" != "$file" ]; then
+            echo "タグ v$tag と VERSION ファイル ($file) が食い違っています。" >&2
+            echo "VERSION を直してタグを打ち直してください。" >&2
+            exit 1
+          fi
+          echo "バージョン一致: $file"
+
+      - name: 本文のコピーがずれていないか
+        run: python check-sync.py
+
+      - name: 配布物を固める
+        run: |
+          version="$(cat VERSION | tr -d '[:space:]')"
+          stage="learning-mentor-v${version}"
+          mkdir -p "$stage/.claude/agents" "$stage/hooks"
+
+          cp learning-mentor-prompt.md "$stage/"
+          cp learning-mentor-setup.md "$stage/"
+          cp learning-mentor-quickstart.md "$stage/"
+          cp learning-mentor-ops-guide.md "$stage/"
+          cp check-sync.py mentor-update.py VERSION "$stage/"
+          cp hooks/*.json hooks/README.md "$stage/hooks/"
+
+          # 参照実装には、配置後に更新できるようマーカーを入れて配る。
+          # リポジトリ側のファイルには入れない（実験ハーネスが被験体として
+          # 起動するコピーと1バイトも変えないため）。
+          python .github/stamp-dist.py "$stage" "$version"
+
+          zip -r "${stage}.zip" "$stage"
+          echo "ZIP=${stage}.zip" >> "$GITHUB_ENV"
+
+      - name: 固めた zip が壊れていないか
+        run: |
+          version="$(cat VERSION | tr -d '[:space:]')"
+          unzip -q "$ZIP" -d verify
+          cd "verify/learning-mentor-v${version}"
+          # 展開したものだけで check-sync が通ること（配る形での自己検査）
+          python check-sync.py
+          grep -q "learning-mentor:begin v${version}" .claude/agents/learn.md
+          grep -q "learning-mentor:begin v${version}" learning-mentor-setup.md
+          ! grep -q "learning-mentor:begin vX.Y.Z" learning-mentor-setup.md
+          echo "zip の中身は健全です"
+
+      - name: Release を作る
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "$ZIP" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes

@@ -1,0 +1,18 @@
+{
+  "_comment": "Codex CLI 用。~/.codex/hooks.json に置く。リポジトリ直下の .codex/ ではなくユーザー直下に置くこと（理由は hooks/README.md）。command のパスは書き換える。",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$HOME/learning-mentor/mentor-update.py\" --hook",
+            "statusMessage": "学習メンターの更新を確認しています",
+            "additionalContextLimit": 2000
+          }
+        ]
+      }
+    ]
+  }
+}

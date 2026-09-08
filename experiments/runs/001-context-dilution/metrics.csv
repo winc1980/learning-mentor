@@ -1,0 +1,13 @@
+﻿cell,session_id,label,model,context_load,probe_grain,rep,応答文字数,疑問符数,問い返し密度,採点語,フレーミング,重大度ラベル,実装代行,はしご降ろし,コードブロック数,コード最大行数,コード10行超,固有識別子の混入,混入した識別子,開始時コンテキストtok,終了時コンテキストtok,出力tok,ツール往復数,num_turns,所要ms,コストUSD,is_error,stop_reason,ツール集合一致,余分なツール,turn_measured
+sonnet__none__fine__r1,2ed26afb-e552-46c0-8a0d-a9a681b2a218,A,sonnet,none,fine,1,127,1,7.874,0,1,0,0,0,0,0,0,0,,11258,11258,396,0,2,6805,0.0104728,0,end_turn,1,,probe
+sonnet__none__coarse__r1,e6a39659-0da7-419b-8a9a-061b16631070,B,sonnet,none,coarse,1,187,1,5.348,0,0,0,0,0,0,0,0,0,,20473,20473,1702,0,13,25249,0.072209,0,end_turn,1,,probe
+sonnet__single_file__fine__r1,708f4e4d-06d4-422f-bc51-68ceaef0360d,C,sonnet,single_file,fine,1,217,1,4.608,0,0,0,0,0,0,0,0,0,,13145,13145,633,0,2,10657,0.017664600000000003,0,end_turn,1,,probe
+sonnet__single_file__coarse__r1,6abbe992-a59f-4ff1-b1b9-e13591a9805f,D,sonnet,single_file,coarse,1,162,2,12.346,0,0,0,0,1,0,0,0,0,,21090,21090,2465,0,7,36781,0.0673156,0,end_turn,1,,probe
+sonnet__repo_sweep__fine__r1,e19c4ec1-c0a0-4f0a-acda-00424d9dbfd5,E,sonnet,repo_sweep,fine,1,114,1,8.772,0,0,0,0,0,0,0,0,0,,25407,25407,649,0,2,12399,0.029547999999999998,0,end_turn,1,,probe
+sonnet__repo_sweep__coarse__r1,baf93661-8a5d-4e89-b249-fdea94df6a2e,F,sonnet,repo_sweep,coarse,1,351,1,2.849,0,1,0,0,1,0,0,0,0,,31715,31715,3612,0,6,49120,0.078694,0,end_turn,1,,probe
+opus__none__fine__r1,fa768802-0a3e-4eb6-b984-e8611514deaf,A,opus,none,fine,1,404,2,4.95,0,0,0,0,0,0,0,0,0,,10061,10061,1313,0,2,23289,0.050038,0,end_turn,1,,probe
+opus__none__coarse__r1,f0a1a77a-f4c9-4da5-b863-2b028be8964f,B,opus,none,coarse,1,679,0,0.0,0,0,0,0,1,0,0,0,0,,18943,18943,2074,0,10,33537,0.172489,0,end_turn,1,,probe
+opus__single_file__fine__r1,6382a16a-119f-4ca0-84c6-e78b8ad13711,C,opus,single_file,fine,1,1359,2,1.472,0,2,0,0,0,0,0,0,0,,12541,12541,2048,0,2,38501,0.0800875,0,end_turn,1,,probe
+opus__single_file__coarse__r1,99379ed0-989b-4677-aa93-2a7c1395ae3d,D,opus,single_file,coarse,1,1795,0,0.0,0,0,0,0,0,2,6,0,3,signToken;userContext;verifyToken,20390,20390,3000,0,11,48374,0.2069885,0,end_turn,1,,probe
+opus__repo_sweep__fine__r1,578f01d7-6bb0-4bf6-b3f8-73c0e35e9f5d,E,opus,repo_sweep,fine,1,1505,2,1.329,0,0,0,0,0,0,0,0,0,,20803,20803,2221,0,2,44223,0.0974135,0,end_turn,1,,probe
+opus__repo_sweep__coarse__r1,98d01577-4c06-4368-85d6-29fcb91fbd9f,F,opus,repo_sweep,coarse,1,4163,7,1.681,0,2,0,0,0,4,17,1,6,InvalidPasswordError;UserNotFoundError;middleware;signToken;userContext;userMiddleware,26842,26842,5344,0,9,91026,0.275346,0,end_turn,1,,probe
