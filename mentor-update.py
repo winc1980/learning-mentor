@@ -39,6 +39,7 @@ import io
 import json
 import os
 import re
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -744,6 +745,187 @@ def ensure_codex_feature(tool):
 
 
 # --------------------------------------------------------------------------
+# 個人の配置物をチームリポジトリに巻き込まない
+# --------------------------------------------------------------------------
+#
+# なぜ要るか:
+#   配置先はAIが環境ごとに判断する（learning-mentor-setup.md）。学習会の参加者が
+#   普段の開発リポジトリに【B】呼び出し型で配置すると、置き場所はツール・OS・
+#   本人の判断で人によって変わる。.gitignore に入れておかないと、次の
+#   `git add` や `git status` に個人の配置物が混ざり、「AIメンター導入」だけの
+#   PR が参加者の数だけ飛んでくる。チーム開発では無意味な差分でしかない。
+
+GITIGNORE_MARK_BEGIN = "# learning-mentor:gitignore begin"
+GITIGNORE_MARK_END = "# learning-mentor:gitignore end"
+
+
+def find_repo_root(path):
+    """path から上へ辿って .git のあるディレクトリを探す。無ければ None。"""
+    current = os.path.dirname(os.path.abspath(path))
+    while True:
+        if os.path.exists(os.path.join(current, ".git")):
+            return current
+        parent = os.path.dirname(current)
+        if parent == current:
+            return None
+        current = parent
+
+
+def gitignore_entry(repo_root, target_path):
+    """.gitignore に書く1行。リポジトリ直下からの相対パスで、先頭に / を付けて
+    同名ファイルが別の場所にあっても巻き込まないようにする。"""
+    rel = os.path.relpath(os.path.abspath(target_path), repo_root).replace(os.sep, "/")
+    return "/" + rel
+
+
+def already_ignored(existing_lines, entry):
+    """entry そのもの、または entry を含む親ディレクトリの除外が既にあるか。"""
+    stripped = {line.strip().lstrip("/") for line in existing_lines}
+    bare = entry.lstrip("/")
+    if bare in stripped:
+        return True
+    parts = bare.split("/")
+    for i in range(1, len(parts)):
+        if "/".join(parts[:i]) + "/" in stripped:
+            return True
+    return False
+
+
+def update_gitignore(repo_root, entries):
+    """learning-mentor 専用ブロックを .gitignore に足す（無ければ作る）。
+
+    既存のブロックがあれば中身を読み取って合流させる（再実行しても重複しない）。
+    変更が無かった場合は書き込まない。
+    戻り値: (path, 書き込んだかどうか)
+    """
+    path = os.path.join(repo_root, ".gitignore")
+    try:
+        with io.open(path, encoding="utf-8") as f:
+            text = f.read()
+    except (IOError, OSError):
+        text = ""
+
+    lines = text.splitlines()
+    begin_at = next((i for i, l in enumerate(lines) if l.strip() == GITIGNORE_MARK_BEGIN), None)
+    end_at = next((i for i, l in enumerate(lines) if l.strip() == GITIGNORE_MARK_END), None)
+
+    if begin_at is not None and end_at is not None and end_at > begin_at:
+        before, block_body, after = lines[:begin_at], lines[begin_at + 1:end_at], lines[end_at + 1:]
+    else:
+        before, block_body, after = lines, [], []
+
+    existing_entries = [l for l in block_body if l.strip() and not l.strip().startswith("#")]
+    merged = list(existing_entries)
+    for entry in entries:
+        if entry not in merged and not already_ignored(before + merged + after, entry):
+            merged.append(entry)
+
+    if not merged:
+        return path, False
+    if merged == existing_entries and begin_at is not None:
+        return path, False
+
+    block = [GITIGNORE_MARK_BEGIN,
+             "# 学習メンターの個人導入物。配置先は人によって違うので追跡しない"] + merged + [GITIGNORE_MARK_END]
+
+    new_lines = before + ([""] if before and before[-1].strip() != "" else []) + block
+    if after:
+        new_lines = new_lines + [""] + after
+
+    new_text = "\n".join(new_lines).rstrip("\n") + "\n"
+    if new_text == text:
+        return path, False
+
+    with io.open(path, "w", encoding="utf-8", newline="") as f:
+        f.write(new_text)
+    return path, True
+
+
+def content_outside_markers(text):
+    """マーカーで囲まれた本文を取り除いた残り。embedded 判定に使う。"""
+    found = MARK_BEGIN_RE.search(text)
+    if not found:
+        return text
+    end_at = text.find(MARK_END, found.end())
+    if end_at == -1:
+        return text
+    return text[:found.start()] + text[end_at + len(MARK_END):]
+
+
+def is_tracked_by_git(repo_root, path):
+    """path が既に git 管理下にあるか。無ければ False（git が無い環境でも False）。"""
+    rel = os.path.relpath(os.path.abspath(path), repo_root).replace(os.sep, "/")
+    try:
+        result = subprocess.run(
+            ["git", "ls-files", "--error-unmatch", "--", rel],
+            cwd=repo_root, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return result.returncode == 0
+    except (OSError, ValueError):
+        return False
+
+
+def protect_targets_from_git(targets):
+    """配置先を調べ、リポジトリ内のものは .gitignore に足す。表示行のリストを返す。
+
+    - agent（frontmatter 付きの単独ファイル）は無条件で対象にする
+    - embedded（CLAUDE.md / AGENTS.md など）は、マーカーの外に本文が無い
+      （＝このファイルが実質メンター専用ファイルとして新規に作られた）場合だけ
+      対象にする。既存の記述と同居している場合は自動で除外できないので警告に回す
+    """
+    lines = []
+    by_repo = {}
+    no_repo = []
+    warn_embedded = []
+    tracked_already = []
+
+    for target in targets:
+        path = target["path"]
+        kind = target["kind"]
+        if kind == "embedded":
+            try:
+                with io.open(path, encoding="utf-8") as f:
+                    remainder = content_outside_markers(f.read())
+            except (IOError, OSError):
+                remainder = None
+            if remainder is None or remainder.strip():
+                warn_embedded.append(path)
+                continue
+
+        root = find_repo_root(path)
+        if root is None:
+            no_repo.append(path)
+            continue
+        by_repo.setdefault(root, []).append(path)
+        if is_tracked_by_git(root, path):
+            tracked_already.append((root, path))
+
+    for root, paths in by_repo.items():
+        entries = [gitignore_entry(root, p) for p in paths]
+        gpath, changed = update_gitignore(root, entries)
+        if changed:
+            lines.append("gitignore: %s に追記しました" % gpath)
+        else:
+            lines.append("gitignore: %s は既に対応済みです" % gpath)
+
+    for root, path in tracked_already:
+        lines.append("gitignore: ★ %s は既に git 管理下です。"
+                      "`git rm --cached -- \"%s\"` で追跡を外してください"
+                      % (path, os.path.relpath(path, root).replace(os.sep, "/")))
+
+    for path in warn_embedded:
+        lines.append("gitignore: ★ %s は既存ファイルへの同居配置（embedded）のため、"
+                      "自動では除外できません" % path)
+        lines.append("           他の記述と同じファイルにあるので、ファイルごと無視すると"
+                      "チームの記述も消えます。共有リポジトリなら【A】の分離運用か、"
+                      "個人用ファイルへの分離を検討してください。")
+
+    for path in no_repo:
+        lines.append("gitignore: %s は git リポジトリの外なので対象外です" % path)
+
+    return lines
+
+
+# --------------------------------------------------------------------------
 # モード: --setup
 # --------------------------------------------------------------------------
 
@@ -821,6 +1003,9 @@ def cmd_setup(args):
             print("      %s" % MARK_END)
         else:
             print("  OK %s （v%s）" % (target["path"], stamped))
+
+    for line in protect_targets_from_git(targets):
+        print(line)
 
     if args.no_hook:
         print("hook     : 設置していません（--no-hook）")
