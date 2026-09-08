@@ -2,9 +2,9 @@
 
 **AIに「先生役」だけをやらせる設定です。** コードは書いてくれません。その代わり、解説・レビュー・トラブル対応をします。
 
-> **注記：** 現在は **v0.1.0（初回リリース）** です。1.0 に達していないので、
-> 構成・手順・配置先の指定は今後変わることがあります。
+> **注記：** まだ **1.0 に達していません。** 構成・手順・配置先の指定は今後変わることがあります。
 > 新版が出たら `mentor-update.py --apply` で追従してください。
+> いま配布されている版は [Releases](https://github.com/winc1980/learning-mentor/releases) が正です。
 
 ---
 
@@ -58,7 +58,7 @@ Python 3 が必要です。`python` が使えない場合は `py -3` に読み�
 
 ### 1. ダウンロードする
 
-[Releases](https://github.com/stama72/learning-mentor/releases) から最新の `learning-mentor-vX.Y.Z.zip` を落として展開します。
+[Releases](https://github.com/winc1980/learning-mentor/releases) から最新の `learning-mentor-vX.Y.Z.zip` を落として展開します。
 
 ### 2. 配置する
 
