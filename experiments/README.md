@@ -2,7 +2,7 @@
 
 メンタープロンプトの規定が、条件を変えたときに守られるかを測る。
 
-**作業の管理は GitHub Issues。** 未着手の実験は [`experiment` ラベル](https://github.com/stama72/learning-mentor/labels/experiment)、
+**作業の管理は GitHub Issues。** 未着手の実験は [`experiment` ラベル](https://github.com/winc1980/learning-mentor/labels/experiment)、
 測らないと決めたものは [DECISIONS.md](DECISIONS.md)。このファイルには**手順と到達点**だけを書く。
 
 ---
