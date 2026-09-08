@@ -4,10 +4,18 @@
 このスクリプトは4つのモードを持つ。すべて1ファイルに入れてあるのは、
 配布物を増やさないため（配るものが増えるほど、古いものが混ざる）。
 
-    --register  配置直後に1回だけ実行し、「どこに何を置いたか」を受領書に記録する
+    --setup     配置直後に1回だけ実行する。受領書を書き、hook を設置し、
+                動作確認の手順を表示する（旧名 --register も受け付ける）
     --check     人が読む形で、新版の有無と hook の健康状態を表示する
     --apply     受領書を見て、配置済みのコピーを最新版に貼り直す
     --hook      SessionStart hook から呼ばれる。JSON を1行返して即座に終わる
+
+なぜ導入を1コマンドに畳むか:
+    受領書の記録・hook の設置・動作確認は、以前は利用者が別々に行う手順だった。
+    そのうち hook の設置は、設定ファイルを手で開いて JSON を継ぎ足し、
+    コマンドのパスを自分の環境に書き換える作業で、**失敗しても何のエラーも出ない**。
+    この製品が最も嫌う失敗の型が、導入手順の中に3つ並んでいた。
+    配置したAIが続けて1回実行すれば済むので、まとめてある。
 
 なぜ受領書が要るか:
     learning-mentor-setup.md は、配置先をAIに判断させる設計になっている。
@@ -229,6 +237,17 @@ def load_receipt():
     return read_json(receipt_path())
 
 
+def command_line(script, mode):
+    """人にそのまま渡せるコマンド行を組む。
+
+    受領書にスクリプトの絶対パスがあるならそれを使う。相対パスで案内すると、
+    受け取った側は「どのディレクトリで打つのか」を自分で解く必要がある。
+    """
+    if script:
+        return '"%s" "%s" %s' % (sys.executable, script, mode)
+    return "mentor-update.py %s" % mode
+
+
 def placed_version(target_path):
     """配置済みファイルが名乗っているバージョンを読む。
 
@@ -259,6 +278,7 @@ def decide_notice(state):
         error                 取得に失敗した理由の文字列。成功していれば None
         last_notified         この端末に前回通知したバージョン。未通知なら None
         hook_last_run_hours   hook が最後に動いてから何時間か。初回なら None
+        script                受領書に記録したスクリプトの絶対パス。無ければ None
 
     戻り値:
         セッション冒頭に差し込む文字列。何も出さないなら None を返す。
@@ -276,7 +296,8 @@ def decide_notice(state):
 
     # 受領書が読めない = 更新できない状態。黙っていると誰も気づかない。
     if not state["local"]:
-        return "学習メンターの受領書が読めません。mentor-update.py --check で確認してください。"
+        return ("学習メンターの受領書が読めません。%s で確認してください。"
+                % command_line(state.get("script"), "--check"))
 
     if not is_newer(state["latest"], state["local"]):
         return None
@@ -289,8 +310,10 @@ def decide_notice(state):
     if already_told and used_recently:
         return None
 
-    return "学習メンターの新版 v%s が出ています（いま v%s）。%s" % (
-        state["latest"], state["local"], RELEASES_PAGE
+    # 更新コマンドは絶対パスで出す。ここに URL しか書かないと、受け取った人は
+    # まず「スクリプトをどこに置いたか」を思い出すところから始めることになる。
+    return "学習メンターの新版 v%s が出ています（いま v%s）。更新するには %s を実行してください（変更点: %s）。" % (
+        state["latest"], state["local"], command_line(state.get("script"), "--apply"), RELEASES_PAGE
     )
     # --- ここまで ---
 
@@ -319,6 +342,7 @@ def cmd_hook(args):
             "error": error,
             "last_notified": previous.get("notified_version"),
             "hook_last_run_hours": hours_since(previous.get("ran_at", "")),
+            "script": (receipt or {}).get("script_path"),
         }
         notice = decide_notice(state)
         if notice and state["latest"]:
@@ -351,11 +375,14 @@ def cmd_check(args):
     receipt = load_receipt()
     if not receipt:
         print("受領書がありません（%s）" % receipt_path())
-        print("配置直後に mentor-update.py --register を実行してください。")
+        print("配置直後に、置いた場所を指定してこれを実行してください:")
+        print("  %s" % command_line(
+            script_path(), "--setup --tool claude-code --target agent:/絶対パス/learn.md"))
         return 1
 
     local = receipt.get("version", "不明")
     print("配置済み : v%s（%s に配置）" % (local, receipt.get("installed_at", "日付不明")))
+    print("運用     : %s / 運用型 %s" % (receipt.get("tool", "不明"), receipt.get("pattern", "不明")))
     print("配置先   :")
     for target in receipt.get("targets", []):
         path = target.get("path", "")
@@ -400,7 +427,8 @@ def cmd_check(args):
             for line in latest_info["notes"].splitlines()[:10]:
                 print("    " + line)
         print()
-        print("更新するには: python mentor-update.py --apply")
+        print("更新するには: %s"
+              % command_line(receipt.get("script_path") or script_path(), "--apply"))
         return 2
     print("最新版   : v%s（最新です）" % latest)
     return 0
@@ -448,7 +476,7 @@ def download_source(asset_url):
 def cmd_apply(args):
     receipt = load_receipt()
     if not receipt:
-        print("受領書がありません。先に --register を実行してください。")
+        print("受領書がありません。先に --setup を実行してください。")
         return 1
 
     latest_info, error = fetch_latest(force=True)
@@ -535,12 +563,188 @@ def cmd_apply(args):
     write_json(receipt_path(), receipt)
     print()
     print("v%s に更新しました。" % latest)
-    print("運用ガイドの「配置後の動作確認」を、更新後にもう一度通してください。")
+    # 更新は本文を丸ごと入れ替える。配置が効いているかの確認は、配置直後と
+    # まったく同じ理由で毎回要る。案内を別ファイルに送らず、その場に出す。
+    print_verification()
     return 0
 
 
 # --------------------------------------------------------------------------
-# モード: --register
+# hook の設置
+# --------------------------------------------------------------------------
+
+# ツールごとの差はこの表だけに閉じる。設定ファイルの場所・matcher・
+# hook エントリに載る追加フィールドの3点しか違わない。
+HOOK_TARGETS = {
+    "claude-code": {
+        "settings": ("~", ".claude", "settings.json"),
+        "matcher": "startup",
+        "fields": {"timeout": 10},
+    },
+    "codex": {
+        "settings": ("~", ".codex", "hooks.json"),
+        "matcher": "startup|resume",
+        "fields": {
+            "statusMessage": "学習メンターの更新を確認しています",
+            "additionalContextLimit": 2000,
+        },
+    },
+}
+
+
+def script_path():
+    return os.path.abspath(__file__)
+
+
+def hook_command():
+    """hook から呼ばせるコマンド行。
+
+    `python` ではなく sys.executable を書く。--setup を実行できた解釈器は
+    確実に存在するが、`python` が PATH にある保証はない（Windows では特に多い）。
+    ここを間違えても hook は黙って何もしないので、推測できる箇所は推測しない。
+    """
+    return '"%s" "%s" --hook' % (sys.executable, script_path())
+
+
+def hook_entry(tool):
+    spec = HOOK_TARGETS[tool]
+    inner = {"type": "command", "command": hook_command()}
+    inner.update(spec["fields"])
+    return {"matcher": spec["matcher"], "hooks": [inner]}
+
+
+def find_mentor_hook(groups):
+    """既存の SessionStart 設定に、このスクリプトの hook があるか。
+
+    戻り値: "ours"（同じ場所のスクリプト）/ "other"（別の場所の mentor-update.py）/ None
+    """
+    mine = script_path().replace("\\", "/").lower()
+    found = None
+    for group in groups or []:
+        for entry in (group or {}).get("hooks", []) or []:
+            command = (entry.get("command") or "")
+            if "mentor-update.py" not in command or "--hook" not in command:
+                continue
+            if mine in command.replace("\\", "/").lower():
+                return "ours"
+            found = "other"
+    return found
+
+
+def backup_and_write(path, text):
+    if os.path.exists(path):
+        with io.open(path, encoding="utf-8") as f:
+            original = f.read()
+        with io.open(path + ".bak", "w", encoding="utf-8", newline="") as f:
+            f.write(original)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with io.open(path, "w", encoding="utf-8", newline="") as f:
+        f.write(text)
+
+
+def install_hook(tool):
+    """SessionStart hook を設定ファイルに書く。
+
+    衝突したら書かない。**既存の SessionStart 設定があれば、触らずに
+    「ここに、これを足してください」と報告して終わる。**
+
+    自動でマージするほうが手数は減る。それでもこうしたのは、設定ファイルが
+    学習者のものだから。こちらが勝手に組み替えると、組み替えたことも、
+    組み替え損ねたことも伝わらない。この製品は一貫して
+    「静かに直す」より「うるさく報告する」を選んできた。ここでも同じ側に倒す。
+
+    戻り値: (status, 表示する行のリスト)
+        status は "installed" / "already" / "skipped" / "failed"
+    """
+    if tool not in HOOK_TARGETS:
+        return "skipped", [
+            "hook     : ★ 設置していません（--tool %s は自動設置に未対応）" % (tool or "未指定"),
+            "           対応しているのは %s です。" % " / ".join(sorted(HOOK_TARGETS)),
+            "           手で入れる場合は hooks/README.md を見てください。",
+            "           コマンドはこれです: %s" % hook_command(),
+        ]
+
+    path = os.path.expanduser(os.path.join(*HOOK_TARGETS[tool]["settings"]))
+    settings = read_json(path, default=None)
+    if settings is None and os.path.exists(path):
+        return "failed", [
+            "hook     : ★ %s を読めませんでした（JSON として壊れている可能性）" % path,
+            "           直してから --setup をもう一度実行してください。",
+        ]
+    settings = settings if isinstance(settings, dict) else {}
+
+    hooks = settings.get("hooks")
+    hooks = hooks if isinstance(hooks, dict) else {}
+    existing = hooks.get("SessionStart")
+
+    if existing:
+        state = find_mentor_hook(existing)
+        if state == "ours":
+            lines = ["hook     : 設置済み（%s）" % path]
+            lines.extend(ensure_codex_feature(tool))
+            return "already", lines
+        reason = ("別の場所の mentor-update.py が登録されています"
+                  if state == "other" else "ほかの SessionStart 設定が入っています")
+        return "skipped", [
+            "hook     : ★ 書き込みませんでした — %s に%s" % (path, reason),
+            "           上書きすると既存の設定を壊すので、触っていません。",
+            "           SessionStart の配列に、次を手で足してください:",
+        ] + ["           " + line
+             for line in json.dumps(hook_entry(tool), ensure_ascii=False, indent=2).splitlines()]
+
+    hooks["SessionStart"] = [hook_entry(tool)]
+    settings["hooks"] = hooks
+    try:
+        backup_and_write(path, json.dumps(settings, ensure_ascii=False, indent=2) + "\n")
+    except Exception as exc:
+        return "failed", ["hook     : ★ %s に書けませんでした — %s" % (path, exc)]
+
+    lines = ["hook     : 設置しました（%s）" % path]
+    lines.extend(ensure_codex_feature(tool))
+    return "installed", lines
+
+
+def ensure_codex_feature(tool):
+    """Codex は hook 機能自体がフラグの裏にある。config.toml 側も面倒を見る。
+
+    TOML を機械で書き換えるのは危ないので、安全に足せると分かる場合しか触らない。
+    既に [features] テーブルがあるなら、そこへ追記すると重複テーブルで
+    設定ファイル全体が読めなくなる。その場合は報告だけして手を引く。
+    """
+    if tool != "codex":
+        return []
+    path = os.path.expanduser(os.path.join("~", ".codex", "config.toml"))
+    try:
+        with io.open(path, encoding="utf-8") as f:
+            text = f.read()
+    except (IOError, OSError):
+        text = None
+
+    if text is None:
+        try:
+            backup_and_write(path, "[features]\ncodex_hooks = true\n")
+        except Exception as exc:
+            return ["           ★ %s を作れませんでした — %s" % (path, exc)]
+        return ["           %s に [features] codex_hooks = true を書きました" % path]
+
+    if re.search(r"^\s*codex_hooks\s*=\s*true", text, re.MULTILINE):
+        return ["           config.toml の codex_hooks は有効です"]
+
+    if re.search(r"^\s*\[features\]", text, re.MULTILINE):
+        return [
+            "           ★ %s に既に [features] があります。触っていません。" % path,
+            "           そのテーブルに codex_hooks = true を手で足してください。",
+        ]
+
+    try:
+        backup_and_write(path, text.rstrip("\n") + "\n\n[features]\ncodex_hooks = true\n")
+    except Exception as exc:
+        return ["           ★ %s に書けませんでした — %s" % (path, exc)]
+    return ["           %s に [features] codex_hooks = true を足しました（元は .bak）" % path]
+
+
+# --------------------------------------------------------------------------
+# モード: --setup
 # --------------------------------------------------------------------------
 
 def read_version_file():
@@ -552,8 +756,38 @@ def read_version_file():
         return None
 
 
-def cmd_register(args):
-    """配置直後に1回実行して、受領書を書く。
+VERIFY_QUESTION = "使えるツールの名前を、箇条書きで全部挙げてください。"
+
+
+def print_verification():
+    """配置が効いているかを人が確かめる手順を、その場に出す。
+
+    ここだけは自動化できない。配置が効いているかは、そのセッションが実際に
+    何を持っているかにしか現れず、外から観測する手段がないため。
+    README と hooks/README.md を往復させないよう、必要なものは全部ここに出す。
+    """
+    print()
+    print("─" * 60)
+    print("★ 最後に、動作確認をしてください（ここを飛ばさないでください）")
+    print()
+    print("  置き場所を間違えても、エラーは出ません。黙って無視されるだけです。")
+    print("  メンターを起動して、次の質問をそのまま貼ってください。")
+    print()
+    print("      %s" % VERIFY_QUESTION)
+    print()
+    print("  読み取り系だけ（Read / Grep / Glob など）  → 成功")
+    print("  Edit / Write やシェル実行が入っている       → 失敗。置き場所か起動方法が違います")
+    print()
+    print("  「書き換えて」と頼んで断られたかどうかでは判定できません。ツールが無くても")
+    print("  AIは「〜という設定なので、できません」と説明するだけで、区別がつかないためです。")
+    print()
+    print("  hook が本当に動いたかは、セッションを1回起動したあとに分かります:")
+    print("      \"%s\" \"%s\" --check" % (sys.executable, script_path()))
+    print("─" * 60)
+
+
+def cmd_setup(args):
+    """配置直後に1回実行する。受領書・hook・動作確認をまとめて片づける。
 
     setup.md の配置手順の最後で、AI にこれを実行させる想定。
     """
@@ -572,9 +806,12 @@ def cmd_register(args):
         "tool": args.tool or "unknown",
         "pattern": args.pattern or "unknown",
         "source": "https://github.com/%s" % REPO,
+        # 更新のたびにスクリプトを探させないため、自分の居場所を残す。
+        # hook の通知文も --check の案内も、ここを読んで絶対パスで出す。
+        "script_path": script_path(),
         "targets": targets,
     })
-    print("受領書を書きました: %s" % receipt_path())
+    print("受領書   : %s" % receipt_path())
     for target in targets:
         stamped = placed_version(target["path"])
         if stamped is None:
@@ -584,6 +821,15 @@ def cmd_register(args):
             print("      %s" % MARK_END)
         else:
             print("  OK %s （v%s）" % (target["path"], stamped))
+
+    if args.no_hook:
+        print("hook     : 設置していません（--no-hook）")
+    else:
+        _, lines = install_hook(args.tool)
+        for line in lines:
+            print(line)
+
+    print_verification()
     return 0
 
 
@@ -594,12 +840,15 @@ def main(argv=None):
     parser.add_argument("--hook", action="store_true", help="SessionStart hook から呼ぶ")
     parser.add_argument("--check", action="store_true", help="新版の有無と hook の状態を表示（既定）")
     parser.add_argument("--apply", action="store_true", help="配置済みのコピーを最新版に貼り直す")
-    parser.add_argument("--register", action="store_true", help="配置直後に受領書を書く")
+    parser.add_argument("--setup", "--register", action="store_true", dest="setup",
+                        help="配置直後に1回。受領書・hook・動作確認をまとめて行う")
     parser.add_argument("--target", action="append", default=[], metavar="KIND:PATH",
-                        help="--register 用。agent:/path/to/learn.md の形で複数指定できる")
-    parser.add_argument("--tool", help="--register 用。claude-code / codex など")
-    parser.add_argument("--pattern", help="--register 用。A（常時適用型）/ B（呼び出し型）")
-    parser.add_argument("--version", help="--register 用。省略時は VERSION ファイルを読む")
+                        help="--setup 用。agent:/path/to/learn.md の形で複数指定できる")
+    parser.add_argument("--tool", help="--setup 用。claude-code / codex。hook の置き場所を決める")
+    parser.add_argument("--pattern", help="--setup 用。A（常時適用型）/ B（呼び出し型）")
+    parser.add_argument("--no-hook", action="store_true", dest="no_hook",
+                        help="--setup 用。更新のお知らせ（SessionStart hook）を設置しない")
+    parser.add_argument("--version", help="--setup 用。省略時は VERSION ファイルを読む")
     parser.add_argument("--diff", action="store_true", help="--apply 用。差分を全文表示する")
     parser.add_argument("--force", action="store_true", help="--apply 用。同一版でも貼り直す")
     parser.add_argument("--yes", "-y", action="store_true", help="--apply 用。確認を省く")
@@ -607,8 +856,8 @@ def main(argv=None):
 
     if args.hook:
         return cmd_hook(args)
-    if args.register:
-        return cmd_register(args)
+    if args.setup:
+        return cmd_setup(args)
     if args.apply:
         return cmd_apply(args)
     return cmd_check(args)
