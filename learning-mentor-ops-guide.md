@@ -217,11 +217,11 @@ OK   .claude/agents/learn.md （279 行）
 
 本体を直して `check-sync.py` が通ったら、次の順で配ります。
 
-1. `VERSION` を上げる（例 `1.0.0` → `1.1.0`）
+1. `VERSION` を上げる（例 `0.1.0` → `0.2.0`）
 2. コミットして、同じ番号のタグを打って push する
 
 ```bash
-git tag v1.1.0 && git push origin v1.1.0
+git tag v0.2.0 && git push origin v0.2.0
 ```
 
 あとは GitHub Actions が、配布物を固めた zip を添えて Release を作ります。
@@ -229,7 +229,7 @@ git tag v1.1.0 && git push origin v1.1.0
 
 | 関門 | 止まる理由 |
 |---|---|
-| タグと `VERSION` の一致 | ずれると「v1.1.0 と名乗る v1.0.0 の本文」が出回る |
+| タグと `VERSION` の一致 | ずれると「v0.2.0 と名乗る v0.1.0 の本文」が出回る |
 | `check-sync.py` | コピーがずれたまま配ると、受け取った側は何のエラーも見ずに別物を使う |
 
 ### 受け取る側で何が起きるか
