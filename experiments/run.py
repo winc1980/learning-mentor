@@ -45,12 +45,19 @@ TURN_TIMEOUT_SEC = 1200
 
 def preflight():
     """本体プロンプトと fixture 側コピーがずれていないか、fixture が無改変か。"""
+    # check-sync は v0.2.0 で Bun に移った（配布物と同じ実行系で回す）。
+    # 実験ハーネス側は Python のままなので、ここだけ実行系が混ざる。
+    bun = shutil.which("bun")
+    if bun is None:
+        print("NG   bun が見つかりません。check-sync.ts を実行できないため中止します。")
+        return False
+
     checks = (
-        ("check-sync.py", "プロンプト同期"),
-        (os.path.join("experiments", "verify-fixture.py"), "fixture 無改変"),
+        (bun, "check-sync.ts", "プロンプト同期"),
+        (sys.executable, os.path.join("experiments", "verify-fixture.py"), "fixture 無改変"),
     )
-    for script, label in checks:
-        r = subprocess.run([sys.executable, os.path.join(ROOT, script)],
+    for runner, script, label in checks:
+        r = subprocess.run([runner, os.path.join(ROOT, script)],
                            capture_output=True, text=True,
                            encoding="utf-8", errors="replace")
         if r.returncode != 0:
