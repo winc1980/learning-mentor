@@ -396,7 +396,10 @@ def cmd_check(args):
             note = "★ 受領書は v%s だがファイルは v%s" % (local, stamped)
         else:
             note = "OK"
-        print("  [%s] %s  %s" % (target.get("kind", "?"), path, note))
+        label = target.get("kind", "?")
+        if target.get("tool") and target["tool"] != "unknown":
+            label = "%s/%s" % (target["tool"], label)
+        print("  [%s] %s  %s" % (label, path, note))
 
     # hook が本当に動いているか。Codex の対話TUIでは発火しないという報告があり
     # （openai/codex#17532、2026-05-21 時点で open）、しかも失敗してもエラーが出ない。
@@ -614,22 +617,45 @@ def hook_entry(tool):
     return {"matcher": spec["matcher"], "hooks": [inner]}
 
 
-def find_mentor_hook(groups):
-    """既存の SessionStart 設定に、このスクリプトの hook があるか。
+def is_mentor_entry(entry):
+    """この仕組みが置いた hook エントリか。どのリポジトリのコピーでも真になる。
 
-    戻り値: "ours"（同じ場所のスクリプト）/ "other"（別の場所の mentor-update.py）/ None
+    スクリプトのパスは見ない。学習メンターは複数のリポジトリに配置されうるが、
+    **更新通知は端末に1本あれば足りる。**「新版が出た」という事実はリポジトリごとに
+    変わらないし、通知の重複はどのみち stamp.json の既通知判定で潰れる（2本目は
+    何も出さない）。だからどのコピーが登録されていても「うちのもの」と見なし、
+    最新の1本に集約する。
     """
-    mine = script_path().replace("\\", "/").lower()
-    found = None
+    command = ((entry or {}).get("command") or "")
+    return "mentor-update.py" in command and "--hook" in command
+
+
+def consolidate_session_start(groups, desired):
+    """SessionStart の配列を、メンターの hook がちょうど1本ある状態にする。
+
+    **メンター以外のエントリには触らない。** メンターのエントリは、どのリポジトリの
+    コピーを指していても取り除き、最後に desired を1つだけ足す。
+
+    グループ単位ではなくエントリ単位で外すのが要点。1つのグループにメンターの
+    hook と他人の hook が同居している場合、グループごと消すと無関係な設定まで
+    巻き添えになる。
+
+    戻り値: (新しい配列, 取り除いたメンターエントリの数)
+    """
+    kept_groups = []
+    removed = 0
     for group in groups or []:
-        for entry in (group or {}).get("hooks", []) or []:
-            command = (entry.get("command") or "")
-            if "mentor-update.py" not in command or "--hook" not in command:
-                continue
-            if mine in command.replace("\\", "/").lower():
-                return "ours"
-            found = "other"
-    return found
+        entries = (group or {}).get("hooks")
+        if not isinstance(entries, list):
+            kept_groups.append(group)  # 想定外の形は解釈せず、そのまま残す
+            continue
+        kept = [entry for entry in entries if not is_mentor_entry(entry)]
+        removed += len(entries) - len(kept)
+        if kept:
+            survivor = dict(group)
+            survivor["hooks"] = kept
+            kept_groups.append(survivor)
+    return kept_groups + [desired], removed
 
 
 def backup_and_write(path, text):
@@ -644,18 +670,25 @@ def backup_and_write(path, text):
 
 
 def install_hook(tool):
-    """SessionStart hook を設定ファイルに書く。
+    """SessionStart hook を設定ファイルに書く。メンターの hook は常に1本に保つ。
 
-    衝突したら書かない。**既存の SessionStart 設定があれば、触らずに
-    「ここに、これを足してください」と報告して終わる。**
+    v0.1.1 までは「既存の SessionStart 設定があれば触らず報告」だった。実地で
+    破綻した。**2つ目のリポジトリに配置すると、1つ目で自分が置いた hook を
+    「他人の設定」と見なして拒否する。** リポジトリを増やすたびに手作業が要る。
 
-    自動でマージするほうが手数は減る。それでもこうしたのは、設定ファイルが
-    学習者のものだから。こちらが勝手に組み替えると、組み替えたことも、
-    組み替え損ねたことも伝わらない。この製品は一貫して
-    「静かに直す」より「うるさく報告する」を選んできた。ここでも同じ側に倒す。
+    方針を次のように変えた。
+
+        メンターの hook（どのリポジトリのコピーでも）→ 取り除いて、最新の1本に置き換える
+        メンター以外の SessionStart 設定          → 一切触らず、自分のエントリを足す
+
+    「触らず報告」を守るのはメンター以外の設定に対してだけにした。**自分が置いた
+    ものを他人のものとして扱うのは、慎重さではなく取り違えでしかない。**
+
+    集約する（追加しない）のは、通知が端末単位の情報だから。2本目の hook は
+    stamp.json の既通知判定で黙るので、増やしても仕事がない。
 
     戻り値: (status, 表示する行のリスト)
-        status は "installed" / "already" / "skipped" / "failed"
+        status は "installed" / "updated" / "already" / "skipped" / "failed"
     """
     if tool not in HOOK_TARGETS:
         return "skipped", [
@@ -677,32 +710,37 @@ def install_hook(tool):
     hooks = settings.get("hooks")
     hooks = hooks if isinstance(hooks, dict) else {}
     existing = hooks.get("SessionStart")
+    existing = existing if isinstance(existing, list) else []
 
-    if existing:
-        state = find_mentor_hook(existing)
-        if state == "ours":
-            lines = ["hook     : 設置済み（%s）" % path]
-            lines.extend(ensure_codex_feature(tool))
-            return "already", lines
-        reason = ("別の場所の mentor-update.py が登録されています"
-                  if state == "other" else "ほかの SessionStart 設定が入っています")
-        return "skipped", [
-            "hook     : ★ 書き込みませんでした — %s に%s" % (path, reason),
-            "           上書きすると既存の設定を壊すので、触っていません。",
-            "           SessionStart の配列に、次を手で足してください:",
-        ] + ["           " + line
-             for line in json.dumps(hook_entry(tool), ensure_ascii=False, indent=2).splitlines()]
-
-    hooks["SessionStart"] = [hook_entry(tool)]
+    updated, removed = consolidate_session_start(existing, hook_entry(tool))
+    hooks["SessionStart"] = updated
     settings["hooks"] = hooks
+
+    text = json.dumps(settings, ensure_ascii=False, indent=2) + "\n"
     try:
-        backup_and_write(path, json.dumps(settings, ensure_ascii=False, indent=2) + "\n")
+        with io.open(path, encoding="utf-8") as f:
+            unchanged = f.read() == text
+    except (IOError, OSError):
+        unchanged = False
+    if unchanged:
+        return "already", ["hook     : 設置済み（%s）" % path] + ensure_codex_feature(tool)
+
+    try:
+        backup_and_write(path, text)
     except Exception as exc:
         return "failed", ["hook     : ★ %s に書けませんでした — %s" % (path, exc)]
 
-    lines = ["hook     : 設置しました（%s）" % path]
+    others = sum(len(g.get("hooks", [])) for g in updated[:-1] if isinstance(g.get("hooks"), list))
+    if removed:
+        lines = ["hook     : 更新しました（%s）" % path,
+                 "           既にあった学習メンターの登録 %d 件を、このコピーの1本にまとめました"
+                 % removed]
+    else:
+        lines = ["hook     : 設置しました（%s）" % path]
+    if others:
+        lines.append("           ほかの SessionStart 設定 %d 件はそのまま残しています" % others)
     lines.extend(ensure_codex_feature(tool))
-    return "installed", lines
+    return ("updated" if removed else "installed"), lines
 
 
 def ensure_codex_feature(tool):
@@ -968,6 +1006,32 @@ def print_verification():
     print("─" * 60)
 
 
+def merge_targets(existing, incoming):
+    """配置先をパスで合流する。同じ配置先なら上書き、違う配置先なら追加。
+
+    受領書は端末に1つしかない。v0.1.1 まではここを丸ごと置き換えていたため、
+    **2つ目のリポジトリに配置すると1つ目の配置先が受領書から消えていた。**
+    消えた配置先は --apply の対象から外れ、二度と更新されない。しかも
+    エラーは出ない ── この製品が最も嫌う壊れ方だった。
+
+    戻り値: (合流後のリスト, 追加された数, 更新された数)
+    """
+    merged = [dict(target) for target in (existing or []) if isinstance(target, dict)]
+    # Windows のパスは大文字小文字を区別しないので、normcase で突き合わせる
+    index = {os.path.normcase(t.get("path", "")): i for i, t in enumerate(merged)}
+    added = updated = 0
+    for target in incoming:
+        key = os.path.normcase(target["path"])
+        if key in index:
+            merged[index[key]] = target
+            updated += 1
+        else:
+            index[key] = len(merged)
+            merged.append(target)
+            added += 1
+    return merged, added, updated
+
+
 def cmd_setup(args):
     """配置直後に1回実行する。受領書・hook・動作確認をまとめて片づける。
 
@@ -980,23 +1044,41 @@ def cmd_setup(args):
         # ドライブレター（C:/Users/...）を区切りと誤認する。
         found = TARGET_KIND_RE.match(spec)
         kind, path = (found.group(1), found.group(2)) if found else ("agent", spec)
-        targets.append({"kind": kind, "path": os.path.abspath(os.path.expanduser(path))})
+        targets.append({
+            "kind": kind,
+            "path": os.path.abspath(os.path.expanduser(path)),
+            # 配置先ごとにツールを持たせる。複数リポジトリに配置すると、
+            # リポジトリごとに別のツールを使っていることがある
+            "tool": args.tool or "unknown",
+            "registered_at": now_iso(),
+        })
+
+    previous = load_receipt() or {}
+    merged, added, refreshed = merge_targets(previous.get("targets"), targets)
 
     write_json(receipt_path(), {
         "version": version,
-        "installed_at": now_iso(),
-        "tool": args.tool or "unknown",
-        "pattern": args.pattern or "unknown",
+        "installed_at": previous.get("installed_at") or now_iso(),
+        "updated_at": now_iso(),
+        "tool": args.tool or previous.get("tool") or "unknown",
+        "pattern": args.pattern or previous.get("pattern") or "unknown",
         "source": "https://github.com/%s" % REPO,
         # 更新のたびにスクリプトを探させないため、自分の居場所を残す。
         # hook の通知文も --check の案内も、ここを読んで絶対パスで出す。
         "script_path": script_path(),
-        "targets": targets,
+        "targets": merged,
     })
     print("受領書   : %s" % receipt_path())
-    for target in targets:
+    if added and len(merged) > added:
+        print("  配置先 %d 件（今回 %d 件を追加。既存の登録は残しています）"
+              % (len(merged), added))
+    elif refreshed and len(merged) > refreshed:
+        print("  配置先 %d 件（今回 %d 件を更新）" % (len(merged), refreshed))
+    for target in merged:
         stamped = placed_version(target["path"])
-        if stamped is None:
+        if not os.path.exists(target["path"]):
+            print("  ★ %s が見つかりません（--apply の対象から外れています）" % target["path"])
+        elif stamped is None:
             print("  ★ %s にマーカーがありません。本文を次の形で囲んでください:" % target["path"])
             print("      %s" % (MARK_BEGIN % version))
             print("      （本文）")
@@ -1004,6 +1086,8 @@ def cmd_setup(args):
         else:
             print("  OK %s （v%s）" % (target["path"], stamped))
 
+    # .gitignore の面倒を見るのは今回指定された配置先だけ。既に登録済みの
+    # 配置先は前回の --setup で処理済みだし、別リポジトリを勝手に触らない
     for line in protect_targets_from_git(targets):
         print(line)
 
