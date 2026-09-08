@@ -510,7 +510,7 @@ A / B  ← どちらかを残す
 | ツール | 単位 | 人格の差し替え | ツール制限 | 起動方法 |
 |---|---|---|---|---|
 | **Claude Code** | サブエージェント<br>`.claude/agents/learn.md` | 本文が既定のシステムプロンプトを置換 | frontmatter の `tools:` / `disallowedTools:` | `claude --agent learn` |
-| **Codex CLI** | プロファイル<br>`~/.codex/learn.config.toml` | `model_instructions_file` | `sandbox_mode = "read-only"`<br>または `default_permissions = ":read-only"` | `codex --profile learn` |
+| **Codex CLI**<br>**2026-09-08 実機確認済み**<br>（0.153.4） | プロファイル<br>`~/.codex/learn.config.toml` | `model_instructions_file` | `default_permissions = ":read-only"`<br>（旧方式は `sandbox_mode = "read-only"`。**併用不可**） | `codex --profile learn` |
 | **GitHub Copilot** | カスタムエージェント<br>`.github/agents/learn.agent.md` | ファイル本文 | frontmatter の `tools:` に読み取り専用ツールだけ列挙 | チャットのエージェント選択 |
 | **Cursor** | カスタムモード | Custom instructions | モードのツールトグルで Edit をオフ | モード選択 |
 | **Gemini CLI** | **該当なし** | ── | ── | ──（【A】を使う） |
@@ -530,6 +530,21 @@ A / B  ← どちらかを残す
 #### Codex CLI — カスタムプロンプトは非推奨になりました
 
 `~/.codex/prompts/` のカスタムプロンプトは非推奨（Skills に移行）で、そもそも条件2を満たしません。プロファイルを使ってください。`model_instructions_file` が「`AGENTS.md` の代わりに組み込み指示を置換する」キーです。
+
+**2026-09-08、codex-cli 0.153.4 で実際に配置して確かめました。** 上の表の4項目はすべて正しく動きました。そのとき分かった注意点を挙げます。
+
+- **プロファイルは `config.toml` の中の `[profiles.learn]` ではなく、`~/.codex/learn.config.toml` という独立したファイルです。** キーは入れ子にせず、そのファイルの最上位に書きます。`[profiles.<名前>]` を書く旧方式は **0.134.0 以降 `--profile` から読まれなくなりました**（黙って無視されます）
+- **`model_instructions_file` は絶対パスで書いてください。** 相対パスの解決基準は設定ファイルの置き場所で変わります
+- **`sandbox_mode` と `default_permissions` は併用できません。** どちらか一方だけです。新しいのは `default_permissions` のほうで、公式が移行先として案内しています
+- **Windows では `[windows] sandbox` の指定が要ります。** `elevated` か `unelevated` を書きます。**これが無いと、読み取り専用かどうかに関係なく、コマンドが1つも実行できません**（`rejected: blocked by policy` になり、メンターはコードを読むことすらできなくなります）。設定が抜けていてもエラーは出ず、メンターが「環境の制限で読めません」と言うだけなので、原因にたどり着きにくい失敗です
+
+**設定キーが今も現行かどうかは、機械的に確かめられます。**
+
+```bash
+codex exec --strict-config --profile learn "hello"
+```
+
+未知のキーがあると、**モデルを呼ぶ前に**「unknown configuration field」で止まります。改称・削除に気づける唯一の手段なので、配置直後に一度通してください。
 
 #### GitHub Copilot — チャットモードは「カスタムエージェント」に改称されました
 
