@@ -105,3 +105,5 @@ python experiments/analyze.py 006-v2gate-regression      # 条件ごとに集計
 | `runs/<id>/` | 実行結果。`blind/`, `judgments.jsonl`, `metrics.csv`, `report.md` |
 | `fixture/` | 被験体が読むリポジトリ（追跡外。上記の手順で作り直す） |
 | `rubric.md` | 採点基準。**版の読み替え規則もここ** |
+| `rubric-a5.md` | A-5（wex-fine評価）専用の第二ルーブリック。合否ではなく客観カウントのみ。**採点者に渡る前提で書いてあるので、設計意図はここではなく `docs/rubric-a5-design.md` に書く** |
+| `docs/` | 採点者には見せない内部ドキュメント（設計意図など） |

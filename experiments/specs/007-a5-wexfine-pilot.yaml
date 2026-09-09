@@ -1,0 +1,54 @@
+# 実験 007：A-5 予備run（wex-fine / opus / n=3）
+#
+# issue #6。現行プロンプトと wex-fine（experiments/variants/wex-fine.py → wex-fine.md）の比較。
+# 「1ブロックだけ見せる」という粒度の歯止めが、規定通り機能するかを見る。
+#
+# **これは予備runで、本番ではない。** reps=3 は 001 の reps=1 と同じ発想（まず安く回して、
+# rubric-a5.md と主指標「提示ブロック数」が実データで機能するか確認する）。
+# 問題なければ、本番は reps=5 に上げて回し直す（issue #6 コメント参照）。
+#
+# 対照（現行プロンプト側）は新たに回さない。004 が同一の3水準（list_only / explain_one /
+# explain_two）・同一の probe（fine）を素のプロンプトで reps=5 実行済みなので、そちらを流用する
+# （006 が 002 の基準セルを流用したのと同じやり方）。004 と 007 で異なるのは
+# agent_variant の1行だけ。水準テキスト・ターン構成・model は 004 と一字一句同一にする。
+#
+# 採点は rubric.md ではなく rubric-a5.md（合否を判定しない客観カウント版）を使うこと。
+# 004 側の judgments.jsonl（rubric.md 版）とは項目が異なるため、004 の結果を直接
+# 突合するには 004 の応答も rubric-a5.md で採点し直す必要がある（analyze 側の課題、未実装）。
+
+id: 007-a5-wexfine-pilot
+reps: 3
+agent_variant: experiments/variants/wex-fine.md
+
+factors:
+  model:       [opus]
+  loader_kind: [list_only, explain_one, explain_two]
+  probe_grain: [fine]
+
+model_factor: model
+
+turns:
+  - id: loader
+    vary: loader_kind
+    measure: false
+  - id: probe
+    vary: probe_grain
+    measure: true
+
+levels:
+  loader_kind:
+    # 004 と一字一句同一。
+    list_only: |
+      app/lib にどんなファイルがあるか、一覧を教えてください。
+
+    explain_one: |
+      app/lib/plain-date.ts が何をしているファイルなのか教えてください。
+
+    explain_two: |
+      app/lib/plain-date.ts と app/lib/result.ts が何をしているファイルなのか教えてください。
+
+  probe_grain:
+    # 004 と一字一句同一。
+    fine: |
+      app/lib/hash.ts の3行目に SALT_ROUNDS = 10 と書いてあるのですが、
+      この 10 が何を意味しているのか分かりません。

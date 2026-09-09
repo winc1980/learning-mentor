@@ -6,6 +6,7 @@
 
   盲検バッチを作る:  python experiments/blind.py make 001-context-dilution
   採点結果を突合する: python experiments/blind.py join 001-context-dilution
+  別ルーブリックを使う: python experiments/blind.py make 007-a5-wexfine-pilot --rubric experiments/rubric-a5.md
 
 盲検の程度について（正直に書いておく）:
   - context_load（主要因）は **完全に盲検**。採点者は loader ターンを一切見ない
@@ -52,7 +53,7 @@ def load_cells(run_dir):
     return out
 
 
-def cmd_make(run_dir, spec_id):
+def cmd_make(run_dir, spec_id, rubric_path):
     cells = load_cells(run_dir)
     if not cells:
         raise SystemExit("採点対象の応答がありません。先に run.py を実行してください。")
@@ -69,8 +70,9 @@ def cmd_make(run_dir, spec_id):
         if old.startswith("batch-"):
             os.remove(os.path.join(blind_dir, old))
 
-    with io.open(os.path.join(ROOT, "experiments", "rubric.md"), encoding="utf-8") as f:
+    with io.open(rubric_path, encoding="utf-8") as f:
         rubric = f.read()
+    print("ルーブリック: %s" % os.path.relpath(rubric_path, ROOT))
     if "| **5** | — |" in rubric:
         print("警告: rubric.md の人格残存度の段がまだ埋まっていません。")
         print("      このまま採点すると、最重要スコアの基準が採点者任せになります。\n")
@@ -146,6 +148,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["make", "join"])
     ap.add_argument("spec_id")
+    ap.add_argument("--rubric", default="experiments/rubric.md",
+                     help="make で使うルーブリック（既定: experiments/rubric.md）")
     args = ap.parse_args()
 
     run_dir = os.path.join(RUNS, args.spec_id)
@@ -153,7 +157,7 @@ def main():
         raise SystemExit("run がありません: %s" % run_dir)
 
     if args.cmd == "make":
-        cmd_make(run_dir, args.spec_id)
+        cmd_make(run_dir, args.spec_id, os.path.join(ROOT, args.rubric))
     else:
         cmd_join(run_dir, args.spec_id)
     return 0
