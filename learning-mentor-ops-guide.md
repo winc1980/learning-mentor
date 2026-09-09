@@ -219,9 +219,12 @@ codex sandbox -P ":danger-full-access" -C <同じディレクトリ> -- powershe
 | **`docs/concept.md`** | 企画の意図・やらないこと・成功の判定。**腐らないものだけ** |
 | **`CLAUDE.md`** | リポジトリを編集する人・AI 向けの規約 |
 
-ラベルは4系統。`experiment`（測定実験）/ `delivery`（配布・配置・更新）/ `harness`（実験基盤）/
-`feedback`（利用者から届いた声）に、`priority:high` `priority:medium` `priority:low`、
-着手できないものに `blocked` を付けます。
+ラベルは5系統。`experiment`（ハーネスでセルを回す測定実験）/ `evaluation`（実学習者での評価）/
+`delivery`（配布・配置・更新）/ `harness`（実験基盤）/ `feedback`（利用者から届いた声）に、
+`priority:high` `priority:medium` `priority:low`、着手できないものに `blocked` を付けます。
+
+**`experiment` と `evaluation` を混ぜないでください。** 前者は固定台本・AI 被験体で
+規定の遵守を測るもの、後者は実学習者を観察するもので、言えることの範囲がまったく違います。
 
 **利用者の声は Google フォームで受けます。** 参加者に GitHub を開かせないためです。
 運営がフォームの回答を `feedback` の型に写して起票します。**そのとき、報告者が
