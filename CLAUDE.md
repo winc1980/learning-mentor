@@ -93,8 +93,10 @@ zip に何を入れるかの正は `.github/workflows/release.yml` の「配布�
   このプロダクトが繰り返し踏んできた失敗の型。置き場所を間違えてもエラーは出ないし、
   本文がずれても動く。「どう気づくか」まで書いて初めて説明になる。
 - **測っていないことを推奨として書かない。** 根拠があるものは run 番号を、
-  無いものは「未測定」と明示する。とくに
-  [learning-mentor-usage.md](learning-mentor-usage.md) は推奨が集まる場所なので厳しく。
+  無いものは「未測定」と明示する。推奨が集まるのは
+  [docs/tuning-options.md](docs/tuning-options.md)（根拠の強さを付けて溜める場所）なので、
+  そこを厳しく。**配布物の [learning-mentor-usage.md](learning-mentor-usage.md) には、
+  配れる状態になった選択肢だけを移す。**
 - **選好を効果の証拠として扱わない。** 「参加者が気に入った」は期待の表明であって、
   学習に効いた証拠ではない（[experiments/DECISIONS.md](experiments/DECISIONS.md)）。
 
