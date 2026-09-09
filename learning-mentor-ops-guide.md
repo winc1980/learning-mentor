@@ -17,7 +17,7 @@ AIに「学習と解説だけをする」役割を与えるための設定です
 |---|---|
 | `learning-mentor-prompt.md` | 役割定義そのもの。**唯一のソース。** 更新するときはここだけ直す |
 | `learning-mentor-setup.md` | 環境ごとの配置をAIにやらせるためのプロンプト |
-| `learning-mentor-quickstart.md` | **初学者に配る使い方ガイド。** 学習会で最初に配るのはこれ |
+| `learning-mentor-usage.md` | **使い分けとカスタマイズ。** モデル・版の選び方を集める受け皿。**実験が進むたびに増える**（学習会で最初に配るのは README） |
 | `learning-mentor-ops-guide.md` | この文書（運営側向け） |
 | `check-sync.py` | **本文のコピーがずれていないか確認するスクリプト。** 本体を更新したら実行する |
 | `.claude/agents/learn.md` | **参照実装。** 本体プロンプトに frontmatter を付けただけのもの。`claude --agent learn` で起動して動作を確かめる用。**本文は `learning-mentor-prompt.md` のコピーなので、本体を更新したら作り直す** |
@@ -212,12 +212,24 @@ codex sandbox -P ":danger-full-access" -C <同じディレクトリ> -- powershe
 | 置き場所 | 何を置くか |
 |---|---|
 | **Issues** | これからやること。着手できる単位に分ける |
+| **Milestones** | 期日のある段階（学習会・phase3 など）。**残作業を持つのはここと Issues だけ** |
 | **コミットメッセージ** | 完了したことと、その理由。**進捗記録をファイルに残さない** |
 | **`experiments/DECISIONS.md`** | **測らないと決めたこと。** issue にすると閉じて忘れられるため |
 | **`experiments/README.md`** | 実験の手順と到達点 |
+| **`docs/concept.md`** | 企画の意図・やらないこと・成功の判定。**腐らないものだけ** |
+| **`CLAUDE.md`** | リポジトリを編集する人・AI 向けの規約 |
 
-ラベルは3系統。`experiment`（測定実験）/ `delivery`（配布・配置・更新）/ `harness`（実験基盤）に、
+ラベルは5系統。`experiment`（ハーネスでセルを回す測定実験）/ `evaluation`（実学習者での評価）/
+`delivery`（配布・配置・更新）/ `harness`（実験基盤）/ `feedback`（利用者から届いた声）に、
 `priority:high` `priority:medium` `priority:low`、着手できないものに `blocked` を付けます。
+
+**`experiment` と `evaluation` を混ぜないでください。** 前者は固定台本・AI 被験体で
+規定の遵守を測るもの、後者は実学習者を観察するもので、言えることの範囲がまったく違います。
+
+**利用者の声は Google フォームで受けます。** 参加者に GitHub を開かせないためです。
+運営がフォームの回答を `feedback` の型に写して起票します。**そのとき、報告者が
+配置の動作確認を通していたかを必ず確認してください。** 通していない報告は、
+「メンターの挙動が変」と「そもそも普通のAIと話していた」を区別できません。
 
 issue を立てるときは `.github/ISSUE_TEMPLATE/` の型を使ってください。
 **「やること一行」の issue を作らないための枠**です。とくに実験は
