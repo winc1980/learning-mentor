@@ -51,7 +51,7 @@ jobs:
 
           cp learning-mentor-prompt.md "$stage/"
           cp learning-mentor-setup.md "$stage/"
-          cp learning-mentor-quickstart.md "$stage/"
+          cp learning-mentor-usage.md "$stage/"
           cp learning-mentor-ops-guide.md "$stage/"
           cp check-sync.py mentor-update.py VERSION "$stage/"
           cp hooks/*.json hooks/README.md "$stage/hooks/"

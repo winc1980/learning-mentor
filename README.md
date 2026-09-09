@@ -48,7 +48,8 @@ async/await って何ですか
 
 しんどければ「いまは説明したくない」と言えば、すぐ引きます。
 
-> 詳しい使い方 → **[learning-mentor-quickstart.md](learning-mentor-quickstart.md)**（初めての人はこれを読んでください）
+**このページで足ります。** 一度使ってみて、モデルや設定を自分に合わせて調整したくなったら
+→ [learning-mentor-usage.md](learning-mentor-usage.md)
 
 ---
 
@@ -167,10 +168,19 @@ python mentor-update.py --apply
 
 | ファイル | 何か |
 |---|---|
-| `learning-mentor-quickstart.md` | **使い方ガイド。初めての人はこれ** |
+| `learning-mentor-usage.md` | **使い分けとカスタマイズ。** モデルや版の選び方（実験が進むたびに増えます） |
 | `learning-mentor-setup.md` | 配置用。AIに読ませる（または貼り付ける）プロンプト |
 | `learning-mentor-prompt.md` | 役割定義の本体 |
 | `learning-mentor-ops-guide.md` | 運営・導入する人向け |
 | `mentor-update.py` | 導入（`--setup`）と更新（`--apply`）の両方を行うスクリプト |
 | `hooks/` | 更新のお知らせを手で入れる場合の説明と雛形 |
 | `check-sync.py` | 開発用（配布物の整合性チェック） |
+
+---
+
+## なぜこれを作っているのか
+
+サークル内の学習の効率化、AI利用の副作用の低減、教育負担の省力化 ── この3つを、
+1つの介入で減らせるかを試しています。何をやらないと決めたか、何をもって成功とするかは
+**[企画の意図](https://github.com/winc1980/learning-mentor/blob/main/docs/concept.md)** に
+書いてあります（リポジトリ内の文書なので、zip には入っていません）。
