@@ -41,7 +41,7 @@ var FORM_DESCRIPTION = [
   'うまくいかなかった話、途中で使うのをやめた話ほど知りたい内容です。',
   '良かった／悪かったの評価は聞きません。実際に何が起きて、そのあとどうしたかを書いてください。',
   '',
-  '回答は運営がGitHubのissueに記録します。氏名は任意です。'
+  '氏名・discord名などは任意です。'
 ].join('\n');
 
 function createFeedbackForm() {
@@ -55,7 +55,7 @@ function createFeedbackForm() {
   form.setProgressBar(true);
   form.setShowLinkToRespondAgain(true);
   form.setConfirmationMessage(
-    'ありがとうございます。届きました。\n' +
+    'ありがとうございます。ご報告いただいた内容は学習メンターの改善に活用させていただきます。\n' +
     '別の出来事についても報告できます（同じURLからもう一度どうぞ）。'
   );
 
@@ -88,7 +88,7 @@ function createFeedbackForm() {
   // 1項目にまとめると、転記のたびに人が分割することになる。
   form.addTextItem()
     .setTitle('使ったモデル（分かれば）')
-    .setHelpText('例：Claude Opus 4.1 / GPT-5。既定のまま使っていて分からなければ空欄で構いません。')
+    .setHelpText('例：Claude Opus 5 / GPT-5.6 Sol。既定のまま使っていて分からなければ空欄で構いません。')
     .setRequired(false);
 
   form.addTextItem()
@@ -146,15 +146,15 @@ function createFeedbackForm() {
 
   // ── Q11 動作確認（落とさないこと） ──────────────
   form.addMultipleChoiceItem()
-    .setTitle('配置したあと、動作確認（ツール一覧の確認）を通しましたか')
+    .setTitle('メンターを配置したあと、動作確認（ツール一覧の確認）を通しましたか')
     .setHelpText('README の「3. 動作確認する」の手順です。通していなくても構いません。正直に答えてもらう方が、こちらの判断が正確になります。')
     .setChoiceValues(['はい', 'いいえ', '覚えていない'])
     .setRequired(true);
 
   // ── Q12 連絡先 ──────────────────────────────────
   form.addTextItem()
-    .setTitle('連絡先（追加で聞いてもよければ）')
-    .setHelpText('Discordのユーザー名など。空欄で構いません。')
+    .setTitle('名前（追加で詳しい状況などを聞いてもよければ）')
+    .setHelpText('氏名、Discordのユーザー名など。空欄で構いません。')
     .setRequired(false);
 
   // 回答をスプレッドシートに落とす（issue に写すときはここから読む）
