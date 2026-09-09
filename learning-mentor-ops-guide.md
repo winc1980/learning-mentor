@@ -1,4 +1,4 @@
-# 学習メンター 運用ガイド（WINC向け）
+# 学習メンター 運用ガイド（運用担当者向け）
 
 ## これは何か
 
@@ -17,7 +17,7 @@ AIに「学習と解説だけをする」役割を与えるための設定です
 |---|---|
 | `learning-mentor-prompt.md` | 役割定義そのもの。**唯一のソース。** 更新するときはここだけ直す |
 | `learning-mentor-setup.md` | 環境ごとの配置をAIにやらせるためのプロンプト |
-| `learning-mentor-usage.md` | **使い分けとカスタマイズ。** モデル・版の選び方を集める受け皿。**実験が進むたびに増える**（学習会で最初に配るのは README） |
+| `learning-mentor-usage.md` | **使い分けとカスタマイズ。** いま選べるのは運用A / B と GitHub MCP の2つだけ（学習会で最初に配るのは README）。**まだ配れない選択肢は [docs/tuning-options.md](https://github.com/winc1980/learning-mentor/blob/main/docs/tuning-options.md) に置く（リポジトリ内の文書なので zip には入らない）** |
 | `learning-mentor-ops-guide.md` | この文書（運営側向け） |
 | `check-sync.py` | **本文のコピーがずれていないか確認するスクリプト。** 本体を更新したら実行する |
 | `.claude/agents/learn.md` | **参照実装。** 本体プロンプトに frontmatter を付けただけのもの。`claude --agent learn` で起動して動作を確かめる用。**本文は `learning-mentor-prompt.md` のコピーなので、本体を更新したら作り直す** |
@@ -217,6 +217,7 @@ codex sandbox -P ":danger-full-access" -C <同じディレクトリ> -- powershe
 | **`experiments/DECISIONS.md`** | **測らないと決めたこと。** issue にすると閉じて忘れられるため |
 | **`experiments/README.md`** | 実験の手順と到達点 |
 | **`docs/concept.md`** | 企画の意図・やらないこと・成功の判定。**腐らないものだけ** |
+| **`docs/tuning-options.md`** | まだ配れない選択肢と、その根拠の強さ。**配れる状態になったら `learning-mentor-usage.md` へ移す** |
 | **`CLAUDE.md`** | リポジトリを編集する人・AI 向けの規約 |
 
 ラベルは5系統。`experiment`（ハーネスでセルを回す測定実験）/ `evaluation`（実学習者での評価）/
@@ -227,6 +228,7 @@ codex sandbox -P ":danger-full-access" -C <同じディレクトリ> -- powershe
 規定の遵守を測るもの、後者は実学習者を観察するもので、言えることの範囲がまったく違います。
 
 **利用者の声は Google フォームで受けます。** 参加者に GitHub を開かせないためです。
+フォームは[こちら](https://docs.google.com/forms/d/e/1FAIpQLSeltEAaD7Q86DgPaqVQnhO84CIWZQl-eblp9zJ6hHeV5m66Lg/viewform)（README の「使ってみて気づいたことを送る」からも辿れます）。
 運営がフォームの回答を `feedback` の型に写して起票します。**そのとき、報告者が
 配置の動作確認を通していたかを必ず確認してください。** 通していない報告は、
 「メンターの挙動が変」と「そもそも普通のAIと話していた」を区別できません。

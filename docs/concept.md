@@ -1,6 +1,6 @@
 # 学習メンター ── 企画の意図
 
-**読者：** WINC の運営、この企画の是非を判断する人、そして半年後の自分。
+**読者：** WINC の運営、この企画の是非を判断する人、そして半年後のWINC。
 
 **この文書に書くのは「決めたことと、その理由」だけ。** 使い方は [README.md](../README.md)、
 運用の手順は [learning-mentor-ops-guide.md](../learning-mentor-ops-guide.md)、
@@ -141,6 +141,7 @@
 |---|---|
 | 使う人 | [README.md](../README.md) |
 | 設定を自分に合わせたい人 | [learning-mentor-usage.md](../learning-mentor-usage.md) |
+| まだ配れない選択肢の在庫を見たい人 | [tuning-options.md](tuning-options.md) |
 | 配置する AI | [learning-mentor-setup.md](../learning-mentor-setup.md) |
 | 学習会・プロジェクトの運営 | [learning-mentor-ops-guide.md](../learning-mentor-ops-guide.md) |
 | このリポジトリを編集する人・AI | [CLAUDE.md](../CLAUDE.md) |
