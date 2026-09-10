@@ -59,7 +59,7 @@ cp .claude/agents/learn.md experiments/fixture/.claude/agents/learn.md
 
 ```
 python experiments/verify-fixture.py
-python check-sync.py      # fixture の learn.md が本体プロンプトと一致しているか
+bun check-sync.ts         # fixture の learn.md が本体プロンプトと一致しているか
 ```
 
 **`run.py` は各セルの実行前後で `verify-fixture.py` を呼び、NG なら run 全体を止める。**

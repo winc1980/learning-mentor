@@ -1,7 +1,7 @@
 # SessionStart hook の置き方
 
 セッション開始時に、学習メンターの新版が出ていないかを自動で確認します。
-確認するだけで、**書き換えはしません**（更新は `mentor-update.py --apply` を人が実行する）。
+確認するだけで、**書き換えはしません**（更新は `mentor-update.ts --apply` を人が実行する）。
 
 理由は2つ。メンターは `Read` / `Grep` / `Glob` / `WebFetch` / `WebSearch` しか持たない
 **読み取り専用のセッション**なので、そもそも自分を書き換えられません。そして書き換えを
@@ -11,13 +11,13 @@
 
 ## 通常は、手で入れる必要はありません
 
-配置直後に実行する `mentor-update.py --setup` が、`--tool` に応じて設置します。
+配置直後に実行する `mentor-update.ts --setup` が、`--tool` に応じて設置します。
 
 ```
-python mentor-update.py --setup --tool claude-code --target agent:/絶対パス/learn.md
+bun mentor-update.ts --setup --tool claude-code --target agent:/絶対パス/learn.md
 ```
 
-コマンドのパスは**そのとき動いている Python 自身と、スクリプトの絶対パス**が入るので、
+コマンドのパスは**そのとき動いている bun 自身と、スクリプトの絶対パス**が入るので、
 書き換えは要りません。既存ファイルは `.bak` を残します。
 
 既存の設定がある場合の扱いは次のとおりです。**どの場合も手作業は要りません。**
@@ -39,10 +39,12 @@ python mentor-update.py --setup --tool claude-code --target agent:/絶対パス/
 
 ## 手で入れる場合の共通の前提
 
-`mentor-update.py` の置き場所を決めて、絶対パスで指定します。以下は
-`~/learning-mentor/mentor-update.py` に置いた例です。**自分の環境のパスに書き換えてください。**
+`mentor-update.ts` の置き場所を決めて、絶対パスで指定します。以下は
+`~/learning-mentor/mentor-update.ts` に置いた例です。**自分の環境のパスに書き換えてください。**
 
-Windows で `python` が PATH に無い場合は `py -3` に読み替えます。
+`bun` が PATH に無い場合は、bun 自体も絶対パスで書きます（`--setup` が自動で書くときは
+常に絶対パスを使います。ここを間違えても **hook は黙って何もしないだけ**で、
+エラーは出ないためです）。Windows なら `%USERPROFILE%\.bun\bin\bun.exe` が既定の場所です。
 
 ---
 
@@ -59,7 +61,7 @@ Windows で `python` が PATH に無い場合は `py -3` に読み替えます�
       {
         "matcher": "startup",
         "hooks": [
-          { "type": "command", "command": "python \"$HOME/learning-mentor/mentor-update.py\" --hook", "timeout": 10 }
+          { "type": "command", "command": "bun \"$HOME/learning-mentor/mentor-update.ts\" --hook", "timeout": 10 }
         ]
       }
     ]
@@ -107,7 +109,7 @@ OpenAI 側の担当者は `Stop` hook で再現しなかったと述べており
 だから Codex では、**hook を主たる経路にしないでください。** 学習会の節目などに
 
 ```
-python mentor-update.py --check
+bun mentor-update.ts --check
 ```
 
 を手で回すことを、正規の手順として案内してください。hook は動けば得をする補助です。
@@ -120,7 +122,7 @@ hook を書いただけでは、効いているかどうか分かりません。
 次を実行します。
 
 ```
-python mentor-update.py --check
+bun mentor-update.ts --check
 ```
 
 出力の `hook :` の行が判定です。

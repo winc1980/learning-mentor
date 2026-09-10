@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python \"$HOME/learning-mentor/mentor-update.py\" --hook",
+            "command": "bun \"$HOME/learning-mentor/mentor-update.ts\" --hook",
             "statusMessage": "学習メンターの更新を確認しています",
             "additionalContextLimit": 2000
           }

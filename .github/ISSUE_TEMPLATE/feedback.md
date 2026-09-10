@@ -30,7 +30,7 @@ labels: feedback
 - ツール（Claude Code / Codex CLI / その他）：
 - 運用（A: 常時適用 / B: `learn` 呼び出し / 分からない）：
 - モデル（分かれば）：
-- バージョン（`mentor-update.py --check` で分かる。分からなければ空欄）：
+- バージョン（`mentor-update.ts --check` で分かる。分からなければ空欄）：
 
 ## 何をしようとしていたか
 

@@ -6,7 +6,7 @@ name: release
 #   1. VERSION ファイルとタグが一致しているか
 #      → 配置先は本文中のマーカーでバージョンを名乗るので、ここがずれると
 #         「v1.2.0 と名乗る v1.1.0 の本文」が出回る
-#   2. check-sync.py が通るか
+#   2. check-sync.ts が通るか
 #      → 本文のコピーがずれたまま配ると、受け取った側は何のエラーも見ずに
 #         別物のメンターを使うことになる
 
@@ -25,6 +25,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # 配布物は Bun に移したが、stamp-dist.py はリリース時だけ使う内部スクリプトで
+      # 配布物には含まれない。CI には Python があるので、ここは移していない。
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -41,7 +47,7 @@ jobs:
           echo "バージョン一致: $file"
 
       - name: 本文のコピーがずれていないか
-        run: python check-sync.py
+        run: bun check-sync.ts
 
       - name: 配布物を固める
         run: |
@@ -53,7 +59,7 @@ jobs:
           cp learning-mentor-setup.md "$stage/"
           cp learning-mentor-usage.md "$stage/"
           cp learning-mentor-ops-guide.md "$stage/"
-          cp check-sync.py mentor-update.py VERSION "$stage/"
+          cp check-sync.ts mentor-update.ts VERSION "$stage/"
           cp hooks/*.json hooks/README.md "$stage/hooks/"
 
           # 参照実装には、配置後に更新できるようマーカーを入れて配る。
@@ -69,8 +75,10 @@ jobs:
           version="$(cat VERSION | tr -d '[:space:]')"
           unzip -q "$ZIP" -d verify
           cd "verify/learning-mentor-v${version}"
-          # 展開したものだけで check-sync が通ること（配る形での自己検査）
-          python check-sync.py
+          # 展開したものだけで check-sync が通ること（配る形での自己検査）。
+          # check-sync.ts は同梱の mentor-update.ts から差分の部品を import するので、
+          # ここが通ることは「2つが揃って配られている」ことの確認にもなっている。
+          bun check-sync.ts
           grep -q "learning-mentor:begin v${version}" .claude/agents/learn.md
           grep -q "learning-mentor:begin v${version}" learning-mentor-setup.md
           ! grep -q "learning-mentor:begin vX.Y.Z" learning-mentor-setup.md

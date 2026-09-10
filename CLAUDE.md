@@ -27,7 +27,7 @@ AI に「学習と解説だけ」をさせる役割定義（プロンプト）�
 | `.claude/agents/learn.md` | `claude --agent learn` の参照実装 |
 | `experiments/fixture/.claude/agents/learn.md` | 実験ハーネスが被験体として起動する実体（fixture は追跡外） |
 
-**本体を直したら、3 つを貼り直して `python check-sync.py` が通るまでが 1 つの変更。**
+**本体を直したら、3 つを貼り直して `bun check-sync.ts` が通るまでが 1 つの変更。**
 ずれたまま配ると、受け取った側はエラーを何も見ずに別物のメンターを使うことになる。
 リリースの CI もここで止まる。
 
@@ -105,8 +105,8 @@ zip に何を入れるかの正は `.github/workflows/release.yml` の「配布�
 ## よく使うコマンド
 
 ```bash
-python check-sync.py                 # 本文のコピー 3 箇所がずれていないか（変更のたび）
-python mentor-update.py --check      # 配置先・hook・最新版の状態を見る（更新はしない）
+bun check-sync.ts                    # 本文のコピー 3 箇所がずれていないか（変更のたび）
+bun mentor-update.ts --check         # 配置先・hook・最新版の状態を見る（更新はしない）
 
 python experiments/verify-fixture.py                       # fixture が汚れていないか
 python experiments/run.py experiments/specs/<spec>.yaml     # 実験を回す
