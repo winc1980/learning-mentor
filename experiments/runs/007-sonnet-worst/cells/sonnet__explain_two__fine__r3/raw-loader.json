@@ -1,0 +1,234 @@
+{
+  "init": {
+    "type": "system",
+    "subtype": "init",
+    "cwd": "C:\\Users\\stama\\winc\\general\\learning-mentor\\experiments\\fixture",
+    "session_id": "44a934f7-d19f-4865-9007-73543f043ab3",
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "mcp_servers": [],
+    "model": "claude-sonnet-5",
+    "permissionMode": "default",
+    "slash_commands": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator",
+      "advisor",
+      "agents",
+      "auto-mode-setup",
+      "autocompact",
+      "clear",
+      "color",
+      "compact",
+      "config",
+      "context",
+      "effort",
+      "fast",
+      "heapdump",
+      "init",
+      "mcp",
+      "import",
+      "model",
+      "__remote-workflow",
+      "workflow-launch-exec",
+      "reload-plugins",
+      "reload-skills",
+      "rename",
+      "ultrareview",
+      "security-review",
+      "usage-credits",
+      "extra-usage",
+      "usage",
+      "insights",
+      "recap",
+      "skill-doctor",
+      "goal",
+      "design-consent",
+      "design-revoke",
+      "list-agents",
+      "team-onboarding"
+    ],
+    "terminal_slash_commands": [
+      "doctor",
+      "color",
+      "reload-plugins"
+    ],
+    "apiKeySource": "none",
+    "claude_code_version": "2.1.263",
+    "output_style": "default",
+    "agents": [
+      "claude",
+      "claude-code-guide",
+      "Explore",
+      "general-purpose",
+      "learn",
+      "Plan",
+      "statusline-setup",
+      "v2-gate"
+    ],
+    "skills": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator"
+    ],
+    "plugins": [],
+    "capabilities": [
+      "interrupt_receipt_v1",
+      "interrupt_cancel_queued_v1",
+      "msg_lifecycle_v1"
+    ],
+    "analytics_disabled": false,
+    "product_feedback_disabled": false,
+    "uuid": "e33aa4bd-7e69-4e4f-b54b-23eb3ecc86d2",
+    "memory_paths": {
+      "auto": "C:\\Users\\stama\\.claude\\projects\\C--Users-stama-winc-general-learning-mentor-experiments-fixture\\memory\\"
+    },
+    "messaging_socket_path": "\\\\.\\pipe\\LOCAL\\cc-msg-a3a9e5b2d256a004f1c83977ff94474e",
+    "fast_mode_state": "off",
+    "powershell_path": "C:\\Users\\stama\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe"
+  },
+  "result": {
+    "duration_api_ms": 21567,
+    "stop_reason": "end_turn",
+    "session_id": "44a934f7-d19f-4865-9007-73543f043ab3",
+    "total_cost_usd": 0.0450334,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 5582,
+      "cache_read_input_tokens": 25462,
+      "output_tokens": 1658,
+      "output_tokens_details": {
+        "thinking_tokens": 1234
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 5582,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1028,
+          "cache_read_input_tokens": 14639,
+          "cache_creation_input_tokens": 1766,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 1766
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 925,
+        "outputTokens": 20,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.001025,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-sonnet-5": {
+        "inputTokens": 4,
+        "outputTokens": 1658,
+        "cacheReadInputTokens": 25462,
+        "cacheCreationInputTokens": 5582,
+        "webSearchRequests": 0,
+        "costUSD": 0.0440084,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 1234,
+        "canonicalModel": "claude-sonnet-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 3,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "ファイル、読みました。それぞれ小さいユーティリティで、`plain-date.ts` は日付を表すクラス、`result.ts` は成功/失敗を表す型、という感じです。\n\n説明に入る前に一つだけ教えてください。**このファイル、何をしようとしていて目に入りましたか？**（例えば「他のファイルから import されてて辿ってきた」「エラーが出て見に来た」など、きっかけで構いません）\n\nそれと、もう一つだけ。**TypeScript で `A | B` のような「型の合体」（union 型と呼びます）やジェネリクス（`Result<T, E>` の `<T, E>` みたいなやつ）は、使ったことありますか？**",
+    "ttft_ms": 6178,
+    "type": "result",
+    "duration_ms": 20571,
+    "uuid": "78135ef4-399f-4cc9-ae11-948621f21afb",
+    "ttft_stream_ms": 1081,
+    "time_to_request_ms": 64,
+    "first_content_frame_ms": 1594,
+    "queued_turn_count": 0
+  }
+}

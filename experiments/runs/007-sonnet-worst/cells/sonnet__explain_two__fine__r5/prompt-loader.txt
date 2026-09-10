@@ -1,0 +1,1 @@
+app/lib/plain-date.ts と app/lib/result.ts が何をしているファイルなのか教えてください。
