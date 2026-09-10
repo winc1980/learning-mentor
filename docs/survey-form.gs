@@ -122,7 +122,7 @@ function addIdentifier_(form) {
   form.addTextItem()
     .setTitle('GitHub のユーザー名')
     .setHelpText(
-      'fork したリポジトリの URL に出てくる名前です（例：github.com/【ここ】/phase2-web）。\n' +
+      'fork したリポジトリの URL に出てくる名前です（例：github.com/【ここ】/2026-phase-2）。\n' +
       '導入前と導入後の回答を、同じ人のものとして突き合わせるためだけに使います。\n' +
       '回答は運営のみが見ます。個人ごとに点数を付けたり、成績として扱ったりはしません。'
     )
