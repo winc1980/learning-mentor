@@ -39,11 +39,15 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { basename, dirname, join, resolve } from "node:path";
+import { basename, dirname, join, relative, resolve } from "node:path";
 import { inflateRawSync } from "node:zlib";
 
-const REPO = "stama72/learning-mentor";
-const API_LATEST = `https://api.github.com/repos/${REPO}/releases/latest`;
+const REPO = "winc1980/learning-mentor";
+// 参照先を差し替えられるようにしてあるのは、LEARNING_MENTOR_HOME と同じ理由。
+// --apply は本文とスクリプト自身を書き換えるので、**本物のリリースを配る前に
+// 隔離した環境で通しで試せないと、検証手段が「本番で一度やってみる」しかなくなる。**
+const API_LATEST =
+  process.env.LEARNING_MENTOR_API || `https://api.github.com/repos/${REPO}/releases/latest`;
 const RELEASES_PAGE = `https://github.com/${REPO}/releases`;
 
 // 配置済みファイルの中で本文を囲む番兵。begin 側だけがバージョンを名乗る。
@@ -700,7 +704,10 @@ async function cmdCheck(): Promise<number> {
     else if (stamped === null) note = "★ マーカーがありません（--apply で更新できません）";
     else if (stamped !== local) note = `★ 受領書は v${local} だがファイルは v${stamped}`;
     else note = "OK";
-    console.log(`  [${target?.kind ?? "?"}] ${path}  ${note}`);
+    // 複数リポジトリに配置すると、配置先ごとに別のツールを使っていることがある
+    const kind = target?.kind ?? "?";
+    const label = target?.tool && target.tool !== "unknown" ? `${target.tool}/${kind}` : kind;
+    console.log(`  [${label}] ${path}  ${note}`);
   }
 
   // hook が本当に動いているか。Codex の対話TUIでは発火しないという報告があり
@@ -717,10 +724,6 @@ async function cmdCheck(): Promise<number> {
     else if (age !== null && age > 24 * 7) console.log(`hook     : ★ ${when} から動いていません。設定が外れた可能性があります`);
     else console.log(`hook     : OK（最後の実行 ${when}）`);
   }
-
-  // v0.1.x から移ってきた人向け。python 起動のまま残った hook は、.py を消した
-  // 時点で黙って死ぬ。この製品が最も嫌う失敗なので、動いていても先に報告する。
-  for (const line of describeStaleHook(receipt.tool)) console.log(line);
 
   console.log("");
   const [latestInfo, error] = await fetchLatest(true);
@@ -758,39 +761,59 @@ function replaceBetweenMarkers(text: string, body: string, version: string): [st
   return [head + markBegin(version) + "\n" + body.trim() + "\n" + MARK_END + tail, null];
 }
 
-/** リリース zip を落として、本文（learning-mentor-prompt.md）を取り出す。 */
-async function downloadSource(assetUrl: string): Promise<[string | null, string | null]> {
-  let blob: Buffer;
+/** リリース zip を丸ごと落とす。中身の取り出しは readZipEntry に任せる。 */
+async function downloadZip(assetUrl: string): Promise<[Buffer | null, string | null]> {
   try {
     const response = await fetch(assetUrl, {
       headers: { "User-Agent": "learning-mentor-update" },
       signal: AbortSignal.timeout(30_000),
     });
     if (!response.ok) return [null, `zip を取得できませんでした (HTTP ${response.status})`];
-    blob = Buffer.from(await response.arrayBuffer());
+    return [Buffer.from(await response.arrayBuffer()), null];
   } catch (exc) {
     return [null, `zip を取得できませんでした: ${errorText(exc)}`];
   }
-
-  let entry: Buffer | null;
-  try {
-    entry = readZipEntry(blob, "learning-mentor-prompt.md");
-  } catch (exc) {
-    return [null, `zip を展開できませんでした: ${errorText(exc)}`];
-  }
-  if (!entry) return [null, "zip の中に learning-mentor-prompt.md がありません"];
-  return [entry.toString("utf8"), null];
 }
 
-/** 確認プロンプト。対話端末でないなら、黙って進めずに --yes を案内して止める。 */
-function confirm(question: string): boolean {
-  if (!process.stdin.isTTY) {
-    console.log(question);
-    console.log("★ 対話端末ではないため確認できません。意図した実行なら --yes を付けてください。");
-    return false;
+/** zip から1件をテキストで取り出す。無ければ null。 */
+function zipText(zip: Buffer, name: string): string | null {
+  try {
+    const entry = readZipEntry(zip, name);
+    return entry ? entry.toString("utf8") : null;
+  } catch {
+    return null;
   }
-  const answer = (prompt(question) ?? "").trim().toLowerCase();
-  return answer === "y" || answer === "yes";
+}
+
+// 自分自身の更新対象。配布物のうち、置き場所に実体として置かれるものだけ。
+// 文書（README など）は配置先に置かれないので触らない。
+const SELF_FILES = ["mentor-update.ts", "check-sync.ts", "VERSION"];
+
+/**
+ * スクリプト自身を新版に入れ替える計画を立てる。
+ *
+ * **なぜ要るか。** v0.1.x → v0.2.0 の移行でこれが無くて困った。--apply が
+ * 入れ替えるのは本文だけで、スクリプトは古いまま残る。実行系が変わる更新
+ * （Python → Bun）や、hook のコマンド行が変わる更新では、**本文だけ新しくなって
+ * 仕組みが古いまま**という状態になり、しかも本人は更新済みだと思っている。
+ *
+ * 今回の移行そのものは、これでは救えない（救うには v0.1.x 側に要る）。
+ * **次に同じことが起きたときのために入れてある。**
+ *
+ * 戻り値: [path, 旧内容, 新内容] の配列
+ */
+function planSelfUpdate(zip: Buffer): Array<[string, string, string]> {
+  const here = dirname(scriptPath());
+  const plans: Array<[string, string, string]> = [];
+  for (const name of SELF_FILES) {
+    const incoming = zipText(zip, name);
+    if (incoming === null) continue; // zip に無いものは触らない
+    const path = join(here, name);
+    const current = readText(path);
+    if (current === null || current === incoming) continue;
+    plans.push([path, current, incoming]);
+  }
+  return plans;
 }
 
 async function cmdApply(args: Args): Promise<number> {
@@ -816,9 +839,14 @@ async function cmdApply(args: Args): Promise<number> {
     return 1;
   }
 
-  const [body, downloadError] = await downloadSource(latestInfo.asset);
-  if (downloadError || body === null) {
+  const [zip, downloadError] = await downloadZip(latestInfo.asset);
+  if (downloadError || zip === null) {
     console.log(downloadError);
+    return 1;
+  }
+  const body = zipText(zip, "learning-mentor-prompt.md");
+  if (body === null) {
+    console.log("zip の中に learning-mentor-prompt.md がありません");
     return 1;
   }
 
@@ -843,7 +871,9 @@ async function cmdApply(args: Args): Promise<number> {
     plans.push([path, original, updated]);
   }
 
-  if (!plans.length) {
+  const selfPlans = planSelfUpdate(zip);
+
+  if (!plans.length && !selfPlans.length) {
     console.log("書き換える対象がありませんでした。");
     return 1;
   }
@@ -866,6 +896,19 @@ async function cmdApply(args: Args): Promise<number> {
     if (args.diff) for (const line of diff) console.log("      " + line);
   }
 
+  // スクリプト自身の入れ替えは、本文の貼り直しとは意味が違う。同じ確認に混ぜるが、
+  // 別枠で見せる ── 「何が置き換わるのか」を取り違えたまま y と答えさせないため。
+  if (selfPlans.length) {
+    console.log("");
+    console.log("  このスクリプト自身も新版に入れ替えます:");
+    for (const [path, original, updated] of selfPlans) {
+      const diff = unifiedDiff(original.split("\n"), updated.split("\n"), `v${local}`, `v${latest}`, 1);
+      const added = diff.filter((l) => l.startsWith("+") && !l.startsWith("+++")).length;
+      const removed = diff.filter((l) => l.startsWith("-") && !l.startsWith("---")).length;
+      console.log(`      ${path}  +${added} 行 / -${removed} 行`);
+    }
+  }
+
   if (!args.diff) {
     console.log("");
     console.log("  中身を確認するなら --diff を付けて実行してください。");
@@ -882,18 +925,36 @@ async function cmdApply(args: Args): Promise<number> {
     console.log(`更新 ${path} （元は ${basename(path)}.bak）`);
   }
 
+  // 実行中のファイルを上書きすることになるが、Bun は起動時に読み切っているので
+  // この実行は最後まで古いコードのまま走る。次回の起動から新版になる。
+  let selfUpdated = false;
+  for (const [path, original, updated] of selfPlans) {
+    try {
+      writeFileSync(path + ".bak", original, "utf8");
+      writeFileSync(path, updated, "utf8");
+      console.log(`更新 ${path} （元は ${basename(path)}.bak）`);
+      selfUpdated = true;
+    } catch (exc) {
+      // ここで落ちても本文の貼り直しは済んでいる。黙らずに、次の一手を出す。
+      console.log(`★ ${path} を入れ替えられませんでした — ${errorText(exc)}`);
+      console.log(`   zip を落とし直して手で置き換えてください: ${latestInfo.url}`);
+    }
+  }
+
   receipt.version = latest;
   receipt.updated_at = nowIso();
-  // v0.1.x の受領書は .py の絶対パスを持っている。ここを直さないと、次の通知が
-  // 「もう無いファイルを実行してください」と案内し続ける。
   receipt.script_path = scriptPath();
   writeJson(receiptPath(), receipt);
   console.log("");
   console.log(`v${latest} に更新しました。`);
 
-  // 本文だけ新しくして hook が python 起動のまま残ると、更新のお知らせが黙って止まる。
-  // 貼り直しのついでに、必ずここを見る。
-  for (const line of installHook(receipt.tool, true).lines) console.log(line);
+  // スクリプトを入れ替えたら hook の登録も見直す。起動コマンドが変わる更新
+  // （実行系の変更・ファイル名の変更）で、hook だけが古いまま残ると、
+  // 更新のお知らせがエラーも出さずに止まる。冪等なので、変化が無ければ何も書かない。
+  // --no-hook で入れなかった人には生やさない。
+  if (selfUpdated && receipt.hook_installed !== false) {
+    for (const line of installHook(receipt.tool).lines) console.log(line);
+  }
 
   // 更新は本文を丸ごと入れ替える。配置が効いているかの確認は、配置直後と
   // まったく同じ理由で毎回要る。案内を別ファイルに送らず、その場に出す。
@@ -954,38 +1015,52 @@ function normPath(text: string): string {
   return text.replace(/\\/g, "/").toLowerCase();
 }
 
-type HookState = "ours" | "stale" | "other" | null;
+/**
+ * この仕組みが置いた hook エントリか。どのリポジトリのコピーでも真になる。
+ *
+ * スクリプトのパスは見ない。学習メンターは複数のリポジトリに配置されうるが、
+ * **更新通知は端末に1本あれば足りる。**「新版が出た」という事実はリポジトリごとに
+ * 変わらないし、通知の重複はどのみち stamp.json の既通知判定で潰れる（2本目は
+ * 何も出さない）。だからどのコピーが登録されていても「うちのもの」と見なし、
+ * 最新の1本に集約する。
+ *
+ * **拡張子も見ない。** v0.1.x は Python 版（`mentor-update.py`）を登録している。
+ * ここで .ts しか拾わないと、**古い python 起動の1本が外れずに残り、bun の1本と
+ * 二重になる。** しかも .py を消した時点で古いほうは黙って死ぬので、
+ * 「hook が2本あるのに1本も動いていない」状態を誰も検出できない。
+ * 両方を「うちのもの」と見なすことで、v0.1.x からの移行は --setup を通すだけで済む。
+ */
+function isMentorEntry(entry: Json): boolean {
+  const command = String(entry?.command ?? "");
+  return /mentor-update\.(ts|py)/.test(command) && command.includes("--hook");
+}
 
 /**
- * 既存の SessionStart 設定に、このスクリプトの hook があるか。
+ * SessionStart の配列を、メンターの hook がちょうど1本ある状態にする。
  *
- * 「同じ配置か」の判定を、コマンド行の完全一致ではなく スクリプトの
- * 置いてあるディレクトリ で行っている。v0.1.x が書いたコマンド行は
- * `"<python>" "<dir>/mentor-update.py" --hook` で、実行系もファイル名も
- * 変わってしまうため、完全一致では自分の配置を「他人のもの」と誤判定する。
+ * **メンター以外のエントリには触らない。** メンターのエントリは、どのリポジトリの
+ * コピーを指していても取り除き、最後に desired を1つだけ足す。
  *
- * 戻り値の state:
- *     "ours"   いまのコマンド行と一致している
- *     "stale"  同じ配置だがコマンド行が古い（v0.1.x の python 起動など）
- *     "other"  別の場所の mentor-update が登録されている
- *     null     見つからない
+ * グループ単位ではなくエントリ単位で外すのが要点。1つのグループにメンターの
+ * hook と他人の hook が同居している場合、グループごと消すと無関係な設定まで
+ * 巻き添えになる。
+ *
+ * 戻り値: [新しい配列, 取り除いたメンターエントリの数]
  */
-function findMentorHook(groups: Json[]): { state: HookState; entry: Json | null } {
-  const mineDir = normPath(dirname(scriptPath()));
-  const current = hookCommand();
-  let other: { state: HookState; entry: Json } | null = null;
-
+function consolidateSessionStart(groups: Json[], desired: Json): [Json[], number] {
+  const keptGroups: Json[] = [];
+  let removed = 0;
   for (const group of groups ?? []) {
-    for (const entry of group?.hooks ?? []) {
-      const command = String(entry?.command ?? "");
-      if (!/mentor-update\.(ts|py)/.test(command) || !command.includes("--hook")) continue;
-      if (normPath(command).includes(mineDir)) {
-        return { state: command === current ? "ours" : "stale", entry };
-      }
-      other = { state: "other", entry };
+    const entries = group?.hooks;
+    if (!Array.isArray(entries)) {
+      keptGroups.push(group); // 想定外の形は解釈せず、そのまま残す
+      continue;
     }
+    const kept = entries.filter((entry: Json) => !isMentorEntry(entry));
+    removed += entries.length - kept.length;
+    if (kept.length) keptGroups.push({ ...group, hooks: kept });
   }
-  return other ?? { state: null, entry: null };
+  return [[...keptGroups, desired], removed];
 }
 
 function settingsPathFor(tool: string): string {
@@ -1000,46 +1075,27 @@ function backupAndWrite(path: string, text: string): void {
 }
 
 /**
- * --check から呼ぶ、書き換えを伴わない報告。
+ * SessionStart hook を設定ファイルに書く。メンターの hook は常に1本に保つ。
  *
- * v0.1.x の python 起動の hook は、.py を消した時点で黙って動かなくなる。
- * しかも stamp.json には過去の実行記録が残るので、「hook: OK」と出たまま
- * 実際には何も起きていない状態になりうる。そこだけは先に名指しする。
+ * v0.1.1 までは「既存の SessionStart 設定があれば触らず報告」だった。実地で
+ * 破綻した。**2つ目のリポジトリに配置すると、1つ目で自分が置いた hook を
+ * 「他人の設定」と見なして拒否する。** リポジトリを増やすたびに手作業が要る。
+ *
+ * 方針を次のように変えた。
+ *
+ *     メンターの hook（どのリポジトリのコピーでも）→ 取り除いて、最新の1本に置き換える
+ *     メンター以外の SessionStart 設定          → 一切触らず、自分のエントリを足す
+ *
+ * 「触らず報告」を守るのはメンター以外の設定に対してだけにした。**自分が置いた
+ * ものを他人のものとして扱うのは、慎重さではなく取り違えでしかない。**
+ *
+ * 集約する（追加しない）のは、通知が端末単位の情報だから。2本目の hook は
+ * stamp.json の既通知判定で黙るので、増やしても仕事がない。
+ *
+ * 戻り値の status は "installed" / "updated" / "already" / "skipped" / "failed"
  */
-function describeStaleHook(tool: string | undefined): string[] {
-  if (!tool || !(tool in HOOK_TARGETS)) return [];
-  const path = settingsPathFor(tool);
-  const settings = readJson(path);
-  const found = findMentorHook(settings?.hooks?.SessionStart ?? []);
-  if (found.state !== "stale") return [];
-  return [
-    `           ★ ${path} の hook が古い起動コマンドのままです`,
-    `           （登録: ${found.entry?.command}）`,
-    "           --apply を実行すると bun 起動に貼り替えます。",
-  ];
-}
-
-/**
- * SessionStart hook を設定ファイルに書く。
- *
- * 衝突したら書かない。既存の SessionStart 設定があれば、触らずに
- * 「ここに、これを足してください」と報告して終わる。
- *
- * 自動でマージするほうが手数は減る。それでもこうしたのは、設定ファイルが
- * 学習者のものだから。こちらが勝手に組み替えると、組み替えたことも、
- * 組み替え損ねたことも伝わらない。この製品は一貫して
- * 「静かに直す」より「うるさく報告する」を選んできた。ここでも同じ側に倒す。
- *
- * ただし 自分が前に書いた1行を今の形に直すこと（stale）だけは例外で、
- * 黙ってではなく報告つきで書き替える。ここを人任せにすると、v0.1.x から
- * 移った人の更新のお知らせが、エラーも出さずに止まったままになるため。
- *
- * migrateOnly = true（--apply から呼ぶとき）は、新規の設置をしない。
- * --no-hook で入れなかった人に、更新のついでに hook を生やさないため。
- */
-function installHook(tool: string | undefined, migrateOnly = false): { status: string; lines: string[] } {
+function installHook(tool: string | undefined): { status: string; lines: string[] } {
   if (!tool || !(tool in HOOK_TARGETS)) {
-    if (migrateOnly) return { status: "skipped", lines: [] };
     return {
       status: "skipped",
       lines: [
@@ -1066,87 +1122,38 @@ function installHook(tool: string | undefined, migrateOnly = false): { status: s
   settings = settings && typeof settings === "object" ? settings : {};
 
   const hooks = settings.hooks && typeof settings.hooks === "object" ? settings.hooks : {};
-  const existing = hooks.SessionStart;
+  const existing = Array.isArray(hooks.SessionStart) ? hooks.SessionStart : [];
 
-  if (existing && existing.length) {
-    const found = findMentorHook(existing);
-
-    if (found.state === "ours") {
-      return { status: "already", lines: [`hook     : 設置済み（${path}）`, ...ensureCodexFeature(tool)] };
-    }
-
-    if (found.state === "stale" && found.entry) {
-      const before = String(found.entry.command);
-      found.entry.command = hookCommand();
-      // matcher と追加フィールドは版によって増えうる。エントリ全体ではなく
-      // command だけを差し替えるのは、学習者が手で足した設定を消さないため。
-      settings.hooks = hooks;
-      try {
-        backupAndWrite(path, JSON.stringify(settings, null, 2) + "\n");
-      } catch (exc) {
-        return { status: "failed", lines: [`hook     : ★ ${path} に書けませんでした — ${errorText(exc)}`] };
-      }
-      return {
-        status: "migrated",
-        lines: [
-          `hook     : 起動コマンドを貼り替えました（${path}、元は .bak）`,
-          `           前: ${before}`,
-          `           後: ${hookCommand()}`,
-          ...ensureCodexFeature(tool),
-        ],
-      };
-    }
-
-    if (migrateOnly) {
-      return found.state === "other"
-        ? {
-            status: "skipped",
-            lines: [`hook     : ★ ${path} には別の場所の mentor-update が登録されています。触っていません。`],
-          }
-        : { status: "skipped", lines: [] };
-    }
-
-    const reason =
-      found.state === "other"
-        ? "別の場所の mentor-update が登録されています"
-        : "ほかの SessionStart 設定が入っています";
-    return {
-      status: "skipped",
-      lines: [
-        `hook     : ★ 書き込みませんでした — ${path} に${reason}`,
-        "           上書きすると既存の設定を壊すので、触っていません。",
-        "           SessionStart の配列に、次を手で足してください:",
-        ...JSON.stringify(hookEntry(tool), null, 2)
-          .split("\n")
-          .map((line) => "           " + line),
-      ],
-    };
-  }
-
-  if (migrateOnly) {
-    return {
-      status: "skipped",
-      lines: [`hook     : 設定されていません（${path}）。要るなら --setup を実行してください。`],
-    };
-  }
-
-  hooks.SessionStart = [hookEntry(tool)];
+  const [updated, removed] = consolidateSessionStart(existing, hookEntry(tool));
+  hooks.SessionStart = updated;
   settings.hooks = hooks;
+
+  const text = JSON.stringify(settings, null, 2) + "\n";
+  if (raw === text) {
+    return { status: "already", lines: [`hook     : 設置済み（${path}）`, ...ensureCodexFeature(tool)] };
+  }
+
   try {
-    backupAndWrite(path, JSON.stringify(settings, null, 2) + "\n");
+    backupAndWrite(path, text);
   } catch (exc) {
     return { status: "failed", lines: [`hook     : ★ ${path} に書けませんでした — ${errorText(exc)}`] };
   }
-  return { status: "installed", lines: [`hook     : 設置しました（${path}）`, ...ensureCodexFeature(tool)] };
+
+  const others = updated
+    .slice(0, -1)
+    .reduce((n: number, g: Json) => n + (Array.isArray(g?.hooks) ? g.hooks.length : 0), 0);
+  const lines = removed
+    ? [
+        `hook     : 更新しました（${path}）`,
+        `           既にあった学習メンターの登録 ${removed} 件を、このコピーの1本にまとめました`,
+      ]
+    : [`hook     : 設置しました（${path}）`];
+  if (others) lines.push(`           ほかの SessionStart 設定 ${others} 件はそのまま残しています`);
+  lines.push(...ensureCodexFeature(tool));
+  return { status: removed ? "updated" : "installed", lines };
 }
 
-/**
- * Codex は hook 機能自体がフラグの裏にある。config.toml 側も面倒を見る。
- *
- * TOML を機械で書き換えるのは危ないので、安全に足せると分かる場合しか触らない。
- * 既に [features] テーブルがあるなら、そこへ追記すると重複テーブルで
- * 設定ファイル全体が読めなくなる。その場合は報告だけして手を引く。
- */
+
 function ensureCodexFeature(tool: string): string[] {
   if (tool !== "codex") return [];
   const path = expandUser(join("~", ".codex", "config.toml"));
@@ -1176,6 +1183,207 @@ function ensureCodexFeature(tool: string): string[] {
     return [`           ★ ${path} に書けませんでした — ${errorText(exc)}`];
   }
   return [`           ${path} に [features] codex_hooks = true を足しました（元は .bak）`];
+}
+
+
+// --------------------------------------------------------------------------
+// 個人の配置物をチームリポジトリに巻き込まない
+// --------------------------------------------------------------------------
+//
+// なぜ要るか:
+//   配置先はAIが環境ごとに判断する（learning-mentor-setup.md）。学習会の参加者が
+//   普段の開発リポジトリに【B】呼び出し型で配置すると、置き場所はツール・OS・
+//   本人の判断で人によって変わる。.gitignore に入れておかないと、次の
+//   `git add` や `git status` に個人の配置物が混ざり、「AIメンター導入」だけの
+//   PR が参加者の数だけ飛んでくる。チーム開発では無意味な差分でしかない。
+
+const GITIGNORE_MARK_BEGIN = "# learning-mentor:gitignore begin";
+const GITIGNORE_MARK_END = "# learning-mentor:gitignore end";
+
+/** path から上へ辿って .git のあるディレクトリを探す。無ければ null。 */
+function findRepoRoot(path: string): string | null {
+  let current = dirname(resolve(path));
+  for (;;) {
+    if (existsSync(join(current, ".git"))) return current;
+    const parent = dirname(current);
+    if (parent === current) return null;
+    current = parent;
+  }
+}
+
+/**
+ * .gitignore に書く1行。リポジトリ直下からの相対パスで、先頭に / を付けて
+ * 同名ファイルが別の場所にあっても巻き込まないようにする。
+ */
+function gitignoreEntry(repoRoot: string, targetPath: string): string {
+  return "/" + relative(repoRoot, resolve(targetPath)).replace(/\\/g, "/");
+}
+
+/** entry そのもの、または entry を含む親ディレクトリの除外が既にあるか。 */
+function alreadyIgnored(existingLines: string[], entry: string): boolean {
+  const stripped = new Set(existingLines.map((line) => line.trim().replace(/^\/+/, "")));
+  const bare = entry.replace(/^\/+/, "");
+  if (stripped.has(bare)) return true;
+  const parts = bare.split("/");
+  for (let i = 1; i < parts.length; i++) {
+    if (stripped.has(parts.slice(0, i).join("/") + "/")) return true;
+  }
+  return false;
+}
+
+/**
+ * learning-mentor 専用ブロックを .gitignore に足す（無ければ作る）。
+ *
+ * 既存のブロックがあれば中身を読み取って合流させる（再実行しても重複しない）。
+ * 変更が無かった場合は書き込まない。
+ * 戻り値: [path, 書き込んだかどうか]
+ */
+function updateGitignore(repoRoot: string, entries: string[]): [string, boolean] {
+  const path = join(repoRoot, ".gitignore");
+  const text = readText(path) ?? "";
+
+  const lines = text.split("\n");
+  if (lines.length && lines[lines.length - 1] === "") lines.pop(); // splitlines 相当
+  const beginAt = lines.findIndex((l) => l.trim() === GITIGNORE_MARK_BEGIN);
+  const endAt = lines.findIndex((l) => l.trim() === GITIGNORE_MARK_END);
+
+  let before: string[];
+  let blockBody: string[];
+  let after: string[];
+  if (beginAt !== -1 && endAt !== -1 && endAt > beginAt) {
+    before = lines.slice(0, beginAt);
+    blockBody = lines.slice(beginAt + 1, endAt);
+    after = lines.slice(endAt + 1);
+  } else {
+    before = lines;
+    blockBody = [];
+    after = [];
+  }
+
+  const existingEntries = blockBody.filter((l) => l.trim() && !l.trim().startsWith("#"));
+  const merged = [...existingEntries];
+  for (const entry of entries) {
+    if (!merged.includes(entry) && !alreadyIgnored([...before, ...merged, ...after], entry)) {
+      merged.push(entry);
+    }
+  }
+
+  if (!merged.length) return [path, false];
+  if (beginAt !== -1 && merged.length === existingEntries.length
+      && merged.every((e, i) => e === existingEntries[i])) {
+    return [path, false];
+  }
+
+  const block = [
+    GITIGNORE_MARK_BEGIN,
+    "# 学習メンターの個人導入物。配置先は人によって違うので追跡しない",
+    ...merged,
+    GITIGNORE_MARK_END,
+  ];
+
+  let newLines = [...before, ...(before.length && before[before.length - 1].trim() !== "" ? [""] : []), ...block];
+  if (after.length) newLines = [...newLines, "", ...after];
+
+  const newText = newLines.join("\n").replace(/\n+$/, "") + "\n";
+  if (newText === text) return [path, false];
+
+  writeFileSync(path, newText, "utf8");
+  return [path, true];
+}
+
+/** マーカーで囲まれた本文を取り除いた残り。embedded 判定に使う。 */
+function contentOutsideMarkers(text: string): string {
+  const found = MARK_BEGIN_RE.exec(text);
+  if (!found) return text;
+  const endAt = text.indexOf(MARK_END, found.index + found[0].length);
+  if (endAt === -1) return text;
+  return text.slice(0, found.index) + text.slice(endAt + MARK_END.length);
+}
+
+/**
+ * path が既に git 管理下にあるか。無ければ false（git が無い環境でも false）。
+ *
+ * Python 版の subprocess.run に相当。Bun.spawnSync は git が PATH に無いと
+ * 例外を投げるので、握って false にする ── ここで落ちると --setup 全体が
+ * 止まってしまい、git の有無という本題と無関係な理由で導入が失敗する。
+ */
+function isTrackedByGit(repoRoot: string, path: string): boolean {
+  const rel = relative(repoRoot, resolve(path)).replace(/\\/g, "/");
+  try {
+    const result = Bun.spawnSync({
+      cmd: ["git", "ls-files", "--error-unmatch", "--", rel],
+      cwd: repoRoot,
+      stdout: "ignore",
+      stderr: "ignore",
+    });
+    return result.exitCode === 0;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 配置先を調べ、リポジトリ内のものは .gitignore に足す。表示行のリストを返す。
+ *
+ * - agent（frontmatter 付きの単独ファイル）は無条件で対象にする
+ * - embedded（CLAUDE.md / AGENTS.md など）は、マーカーの外に本文が無い
+ *   （＝このファイルが実質メンター専用ファイルとして新規に作られた）場合だけ
+ *   対象にする。既存の記述と同居している場合は自動で除外できないので警告に回す
+ */
+function protectTargetsFromGit(targets: Json[]): string[] {
+  const lines: string[] = [];
+  const byRepo = new Map<string, string[]>();
+  const noRepo: string[] = [];
+  const warnEmbedded: string[] = [];
+  const trackedAlready: Array<[string, string]> = [];
+
+  for (const target of targets) {
+    const path = target.path;
+    if (target.kind === "embedded") {
+      const text = readText(path);
+      const remainder = text === null ? null : contentOutsideMarkers(text);
+      if (remainder === null || remainder.trim()) {
+        warnEmbedded.push(path);
+        continue;
+      }
+    }
+
+    const root = findRepoRoot(path);
+    if (root === null) {
+      noRepo.push(path);
+      continue;
+    }
+    if (!byRepo.has(root)) byRepo.set(root, []);
+    byRepo.get(root)!.push(path);
+    if (isTrackedByGit(root, path)) trackedAlready.push([root, path]);
+  }
+
+  for (const [root, paths] of byRepo) {
+    const [gpath, changed] = updateGitignore(root, paths.map((p) => gitignoreEntry(root, p)));
+    lines.push(changed ? `gitignore: ${gpath} に追記しました` : `gitignore: ${gpath} は既に対応済みです`);
+  }
+
+  for (const [root, path] of trackedAlready) {
+    const rel = relative(root, path).replace(/\\/g, "/");
+    lines.push(
+      `gitignore: ★ ${path} は既に git 管理下です。` +
+        `\`git rm --cached -- "${rel}"\` で追跡を外してください`,
+    );
+  }
+
+  for (const path of warnEmbedded) {
+    lines.push(`gitignore: ★ ${path} は既存ファイルへの同居配置（embedded）のため、自動では除外できません`);
+    lines.push(
+      "           他の記述と同じファイルにあるので、ファイルごと無視するとチームの記述も消えます。" +
+        "共有リポジトリなら【A】の分離運用か、個人用ファイルへの分離を検討してください。",
+    );
+  }
+
+  for (const path of noRepo) {
+    lines.push(`gitignore: ${path} は git リポジトリの外なので対象外です`);
+  }
+
+  return lines;
 }
 
 // --------------------------------------------------------------------------
@@ -1218,7 +1426,42 @@ function printVerification(): void {
 }
 
 /**
- * 配置直後に1回実行する。受領書・hook・動作確認をまとめて片づける。
+ * 配置先をパスで合流する。同じ配置先なら上書き、違う配置先なら追加。
+ *
+ * 受領書は端末に1つしかない。v0.1.1 まではここを丸ごと置き換えていたため、
+ * **2つ目のリポジトリに配置すると1つ目の配置先が受領書から消えていた。**
+ * 消えた配置先は --apply の対象から外れ、二度と更新されない。しかも
+ * エラーは出ない ── この製品が最も嫌う壊れ方だった。
+ *
+ * 戻り値: [合流後のリスト, 追加された数, 更新された数]
+ */
+function mergeTargets(existing: Json[] | undefined, incoming: Json[]): [Json[], number, number] {
+  const merged: Json[] = (existing ?? [])
+    .filter((t) => t && typeof t === "object")
+    .map((t) => ({ ...t }));
+  // Windows のパスは大文字小文字を区別しないので、そろえてから突き合わせる
+  const key = (p: string) => (process.platform === "win32" ? String(p ?? "").toLowerCase() : String(p ?? ""));
+  const index = new Map<string, number>(merged.map((t, i) => [key(t.path), i]));
+
+  let added = 0;
+  let updated = 0;
+  for (const target of incoming) {
+    const k = key(target.path);
+    const at = index.get(k);
+    if (at !== undefined) {
+      merged[at] = target;
+      updated++;
+    } else {
+      index.set(k, merged.length);
+      merged.push(target);
+      added++;
+    }
+  }
+  return [merged, added, updated];
+}
+
+/**
+ * 配置直後に1回実行する。受領書・hook・.gitignore・動作確認をまとめて片づける。
  *
  * setup.md の配置手順の最後で、AI にこれを実行させる想定。
  */
@@ -1231,26 +1474,47 @@ function cmdSetup(args: Args): number {
     const found = TARGET_KIND_RE.exec(spec);
     const kind = found ? found[1] : "agent";
     const path = found ? found[2] : spec;
-    targets.push({ kind, path: resolve(expandUser(path)) });
+    targets.push({
+      kind,
+      path: resolve(expandUser(path)),
+      // 配置先ごとにツールを持たせる。複数リポジトリに配置すると、
+      // リポジトリごとに別のツールを使っていることがある
+      tool: args.tool || "unknown",
+      registered_at: nowIso(),
+    });
   }
+
+  const previous = loadReceipt() ?? {};
+  const [merged, added, refreshed] = mergeTargets(previous.targets, targets);
 
   writeJson(receiptPath(), {
     version,
-    installed_at: nowIso(),
-    tool: args.tool || "unknown",
-    pattern: args.pattern || "unknown",
+    installed_at: previous.installed_at || nowIso(),
+    updated_at: nowIso(),
+    tool: args.tool || previous.tool || "unknown",
+    pattern: args.pattern || previous.pattern || "unknown",
     source: `https://github.com/${REPO}`,
     // 更新のたびにスクリプトを探させないため、自分の居場所を残す。
     // hook の通知文も --check の案内も、ここを読んで絶対パスで出す。
     script_path: scriptPath(),
     runtime: "bun",
-    targets,
+    // --no-hook で入れなかったことを覚えておく。--apply が更新のついでに
+    // hook を生やすと、要らないと言った人の設定を黙って変えることになる。
+    hook_installed: !args.noHook,
+    targets: merged,
   });
 
   console.log(`受領書   : ${receiptPath()}`);
-  for (const target of targets) {
+  if (added && merged.length > added) {
+    console.log(`  配置先 ${merged.length} 件（今回 ${added} 件を追加。既存の登録は残しています）`);
+  } else if (refreshed && merged.length > refreshed) {
+    console.log(`  配置先 ${merged.length} 件（今回 ${refreshed} 件を更新）`);
+  }
+  for (const target of merged) {
     const stamped = placedVersion(target.path);
-    if (stamped === null) {
+    if (!existsSync(target.path)) {
+      console.log(`  ★ ${target.path} が見つかりません（--apply の対象から外れています）`);
+    } else if (stamped === null) {
       console.log(`  ★ ${target.path} にマーカーがありません。本文を次の形で囲んでください:`);
       console.log(`      ${markBegin(version)}`);
       console.log("      （本文）");
@@ -1259,6 +1523,10 @@ function cmdSetup(args: Args): number {
       console.log(`  OK ${target.path} （v${stamped}）`);
     }
   }
+
+  // .gitignore の面倒を見るのは今回指定された配置先だけ。既に登録済みの
+  // 配置先は前回の --setup で処理済みだし、別リポジトリを勝手に触らない
+  for (const line of protectTargetsFromGit(targets)) console.log(line);
 
   if (args.noHook) {
     console.log("hook     : 設置していません（--no-hook）");
