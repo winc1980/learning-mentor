@@ -94,6 +94,18 @@ function expandUser(p: string): string {
   return p;
 }
 
+/**
+ * Codex の設定ディレクトリ。`CODEX_HOME` が設定されていればそちらを使う。
+ *
+ * Codex 本体が `CODEX_HOME` で設定ディレクトリを差し替えられる以上、ここが
+ * `~/.codex` 決め打ちだと、その人が実際に使っている設定ではない場所に書き込む。
+ * hook は発火せず、しかもエラーは出ない（#14）。
+ */
+function codexHome(): string {
+  const envHome = process.env.CODEX_HOME;
+  return envHome && envHome.trim() ? envHome : expandUser(join("~", ".codex"));
+}
+
 function readText(path: string): string | null {
   try {
     return readFileSync(path, "utf8");
@@ -968,14 +980,16 @@ async function cmdApply(args: Args): Promise<number> {
 
 // ツールごとの差はこの表だけに閉じる。設定ファイルの場所・matcher・
 // hook エントリに載る追加フィールドの3点しか違わない。
-const HOOK_TARGETS: Record<string, { settings: string[]; matcher: string; fields: Json }> = {
+//
+// codex だけは settings を持たない。パスは環境変数 CODEX_HOME で差し替え
+// うるので、決め打ちの配列ではなく codexHome() で都度解決する（settingsPathFor）。
+const HOOK_TARGETS: Record<string, { settings?: string[]; matcher: string; fields: Json }> = {
   "claude-code": {
     settings: ["~", ".claude", "settings.json"],
     matcher: "startup",
     fields: { timeout: 10 },
   },
   codex: {
-    settings: ["~", ".codex", "hooks.json"],
     matcher: "startup|resume",
     fields: {
       statusMessage: "学習メンターの更新を確認しています",
@@ -1064,7 +1078,8 @@ function consolidateSessionStart(groups: Json[], desired: Json): [Json[], number
 }
 
 function settingsPathFor(tool: string): string {
-  return expandUser(join(...HOOK_TARGETS[tool].settings));
+  if (tool === "codex") return join(codexHome(), "hooks.json");
+  return expandUser(join(...HOOK_TARGETS[tool].settings!));
 }
 
 function backupAndWrite(path: string, text: string): void {
@@ -1156,7 +1171,7 @@ function installHook(tool: string | undefined): { status: string; lines: string[
 
 function ensureCodexFeature(tool: string): string[] {
   if (tool !== "codex") return [];
-  const path = expandUser(join("~", ".codex", "config.toml"));
+  const path = join(codexHome(), "config.toml");
   const text = readText(path);
 
   if (text === null) {
