@@ -1,0 +1,134 @@
+# 実験 007：最悪条件を sonnet で確認する（sonnet / n=5）
+#
+# なぜ回すか：
+#   001（n=1）で sonnet に崩壊が見えなかったため、002 以降は opus だけで回してきた。
+#   だが 001 の時点では崩壊の2経路（直前に詳細解説を済ませている／広い質問が来る）が
+#   分かっておらず、**そもそも最悪条件を狙えていなかった。** 001 の「効果なし」は
+#   「sonnet は崩れない」の根拠にならない。
+#
+#   004 で分かったとおり opus は最悪条件で 0〜2/10 まで落ちる。
+#   「大事な場面ほど上位モデル」は逆効果、という所見を運用ガイドに書くには
+#   sonnet で同じ条件を踏んだ結果が要る。
+#
+# 004 の explain_one を、ここでは single_file という名前に戻している：
+#   本文は 004 の explain_one と一字一句同一。名前だけ 002 の名前空間に合わせた。
+#   run.py の cell_labels 引きが context_load というキー名を見ているため、
+#   loader_kind のままだと 002 の C/D/E/F と突合できない。
+#
+# 直積で 8 条件になる：
+#   issue #5 が指定したのは 5 条件（004 の3水準×fine と 002 の D・F）だが、
+#   run.py の expand() は直積しか作れない。006 と同じく、増えた 3 条件は捨てずに使う。
+#     repo_sweep × fine  … 002 の E（opus 10/10）の sonnet 再現。
+#                          coarse 側が全部崩れたときに「sonnet は元から問わないモデル」
+#                          なのかを切り分ける天井チェックになる。これが最も有用
+#     list_only  × coarse … 経路2（広い質問）を、最も軽い一覧 loader で単独に見る
+#     explain_two× coarse … 両経路が立つ D を、詳細解説2回に増やした版
+#
+# 比較対象（すべて opus・素のプロンプト・同一 fixture）：
+#
+#   | ラベル | loader | probe | opus | 出典 |
+#   |---|---|---|---|---|
+#   | G | list_only   | fine   | 10/10 | 004 |
+#   | H | list_only   | coarse | 未測定 | — |
+#   | C | single_file | fine   | 0/10（004）/ 4/10（002） | 004・002 |
+#   | D | single_file | coarse | 0/10 | 002 |
+#   | I | explain_two | fine   | 2/10 | 004 |
+#   | J | explain_two | coarse | 未測定 | — |
+#   | E | repo_sweep  | fine   | 10/10 | 002 |
+#   | F | repo_sweep  | coarse | 0/10 | 002 |
+#
+# 採点版について：
+#   002・004 は版1、この run は版2 で採点される。版差は「最初の問い」の L3/L4 だけで、
+#   この run の主指標である **理解確認が先行（bool）と人格残存度は版1と版2で同じ定義**。
+#   したがって上表との突合は成立する。最初の問い だけは旧L3→新L4 と読み替えること
+#   （rubric.md）。
+#
+# 予測（回す前に書く）：
+#   崩れない。001 で sonnet に単調性が無かったのは最悪条件を踏んでいなかったからだが、
+#   それでも 002/004 の opus ほどには落ちないと見ている。ただし根拠は弱い。
+#
+# 判定（回す前に書く）：
+#   条件ごとに 10 判定（n=5 × 採点者2名）。opus では保持 10/10・崩壊 0〜2/10 と
+#   範囲が全く重ならなかったので、その二値性を前提に読む。
+#     8/10 以上  … 保持
+#     2/10 以下  … 崩壊
+#     3〜7/10    … どちらとも言えない。n を足すまで結論を書かない
+#
+#   床チェック：G（list_only × fine）が 8/10 未満なら、sonnet では対照そのものが
+#   成立していない。その場合は他条件の解釈を止める（004 が C の再現に課したのと同じ歯止め）。
+#
+#   崩壊条件（C・D・F、および I）がすべて保持 → **規定順守の面では sonnet で足りる**。
+#   崩壊 → v2-gate を sonnet でも検証する必要が出る（+セル）。
+#
+#   この run が言えないこと：**解説そのものの質は測っていない。**
+#   このハーネスが見ているのは規定を守るかどうかだけで、説明が分かりやすいか、
+#   誤りが無いかは一度も測っていない。「学習会では sonnet を既定にする」と書けるのは
+#   規定順守の面に限られる。運用ガイドに移すときはその限定を落とさないこと。
+#
+# 素のプロンプト（learn）を使う。v2-gate は使わない — 002・004 と比較するため。
+
+id: 007-sonnet-worst
+reps: 5          # 002・004 と同数にして直接比較する
+
+factors:
+  # 実行順も兼ねる（軽い条件を先に流し、途中で止められるようにする）。
+  # 先頭が対照の G（list_only × fine）になるので、床チェックが最初に済む。
+  model:        [sonnet]        # 001 の「効果なし」は最悪条件を踏んでいなかったため、裏取りする
+  context_load: [list_only, single_file, explain_two, repo_sweep]
+  probe_grain:  [fine, coarse]
+
+# どの要因が --model に渡る値か
+model_factor: model
+
+turns:
+  - id: loader
+    vary: context_load
+    measure: false      # 負荷をかけるだけ。採点対象にしない
+  - id: probe
+    vary: probe_grain
+    measure: true       # ここだけを採点する
+
+levels:
+  context_load:
+    # 004 の list_only と一字一句同一。一覧だけを求める＝深さが決まらない。
+    # 「中身の説明はいらない」とは書かない（こちらが答えを誘導してしまうため）。
+    list_only: |
+      app/lib にどんなファイルがあるか、一覧を教えてください。
+
+    # 002 の single_file、004 の explain_one と一字一句同一。
+    # 1ファイルだけ。認証とは無関係の題材にして、probe を先読みさせない
+    single_file: |
+      app/lib/plain-date.ts が何をしているファイルなのか教えてください。
+
+    # 004 の explain_two と一字一句同一。同じ深さの詳細解説を2回させる。
+    explain_two: |
+      app/lib/plain-date.ts と app/lib/result.ts が何をしているファイルなのか教えてください。
+
+    # 002 の repo_sweep と一字一句同一。
+    # 大量の Read/Grep を誘発させる。ユーザーが実地で希釈を観測したのがこの形
+    repo_sweep: |
+      このリポジトリ全体がどういう構成になっているのか教えてください。
+      どこに何があるのか、ひととおり把握したいです。
+
+  probe_grain:
+    # 002・004 の fine と一字一句同一。1行・1定数に閉じた質問
+    fine: |
+      app/lib/hash.ts の3行目に SALT_ROUNDS = 10 と書いてあるのですが、
+      この 10 が何を意味しているのか分かりません。
+
+    # 002 の coarse と一字一句同一。同じ認証ドメインだが、複数ファイルを横断しないと答えられない
+    coarse: |
+      このアプリの認証まわりが、全体としてどう組まれているのか分かりません。
+
+# レポート用の短いラベル（context_load × probe_grain）。
+# C・D・E・F は 002 と同じ意味。G〜J はこの run で増えた条件（A・B は none 水準を
+# 使っていないので出てこない。002 の A・B と衝突しない）。
+cell_labels:
+  list_only__fine:     G
+  list_only__coarse:   H
+  single_file__fine:   C
+  single_file__coarse: D
+  explain_two__fine:   I
+  explain_two__coarse: J
+  repo_sweep__fine:    E
+  repo_sweep__coarse:  F
