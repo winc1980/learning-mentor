@@ -7,7 +7,7 @@
 
   1. .claude/agents/learn.md（参照実装）にマーカーを足して書き出す
      リポジトリ側のファイルにはマーカーを入れていない。
-     experiments/fixture/.claude/agents/learn.md は検証ハーネスが被験体として
+     ../learning-mentor-fixture/.claude/agents/learn.md は検証ハーネスが被験体として
      起動する実体で、リポジトリ側と1バイトも変わらないことが前提になっているため。
      配る瞬間にだけ足す。
 

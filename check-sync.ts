@@ -6,7 +6,7 @@
  *
  *   1. learning-mentor-setup.md の「--- ここから下が本文 ---」以降（配置用プロンプトに埋め込む用）
  *   2. .claude/agents/learn.md の frontmatter 以降（`claude --agent learn` 用の参照実装）
- *   3. experiments/fixture/.claude/agents/learn.md（検証ハーネスが被験体として起動する実体）
+ *   3. ../learning-mentor-fixture/.claude/agents/learn.md（検証ハーネスが被験体として起動する実体）
  *
  * 本体を更新したあと、このスクリプトを実行してコピー先の貼り直し漏れを検出する。
  *
@@ -17,7 +17,7 @@
  */
 
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 
 // 差分の見せ方は mentor-update.ts と揃える。配布物を増やさないため共通部品用の
 // ファイルは作らず、必ず同梱される側から借りている（release.yml は両方を zip に入れる）。
@@ -35,13 +35,20 @@ const AGENT = join(".claude", "agents", "learn.md");
 // 本体を更新したときの貼り直し漏れはここでも起きる。しかもここでずれると
 // 「途中でメンターのプロンプトが変わった run」という最悪の事故になるため、
 // experiments/run.py は起動時にこの検査を通してから実行する。
-const FIXTURE_AGENT = join("experiments", "fixture", ".claude", "agents", "learn.md");
+//
+// fixture はリポジトリの外に置く（issue #42）。experiments/ の下に置くと、
+// cwd の祖先にあるこのリポジトリの CLAUDE.md が被験体に渡ってしまうため。
+// 場所の解決規則は experiments/fixture_path.py と揃えること。
+const FIXTURE_ROOT = process.env.MENTOR_FIXTURE
+  ?? join(dirname(ROOT), "learning-mentor-fixture");
+const FIXTURE_AGENT = join(FIXTURE_ROOT, ".claude", "agents", "learn.md");
 
 // 配布物の中で本文を囲む更新用マーカー。詳しくは mentor-update.ts と hooks/README.md。
 const MARKER_RE = /^\s*<!--\s*learning-mentor:(begin\s+v[0-9A-Za-z.\-]+|end)\s*-->\s*$/;
 
 function read(relpath: string): string | null {
-  const path = join(ROOT, relpath);
+  // fixture はリポジトリ外にあるので絶対パスで渡ってくる。ROOT を前置しない。
+  const path = isAbsolute(relpath) ? relpath : join(ROOT, relpath);
   if (!existsSync(path)) return null;
   return readFileSync(path, "utf8");
 }

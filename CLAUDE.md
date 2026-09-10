@@ -25,18 +25,28 @@ AI に「学習と解説だけ」をさせる役割定義（プロンプト）�
 |---|---|
 | `learning-mentor-setup.md` の「--- ここから下が本文 ---」以降 | 配置用プロンプトに埋め込む用 |
 | `.claude/agents/learn.md` | `claude --agent learn` の参照実装 |
-| `experiments/fixture/.claude/agents/learn.md` | 実験ハーネスが被験体として起動する実体（fixture は追跡外） |
+| `../learning-mentor-fixture/.claude/agents/learn.md` | 実験ハーネスが被験体として起動する実体（fixture はリポジトリ外・追跡外） |
 
 **本体を直したら、3 つを貼り直して `bun check-sync.ts` が通るまでが 1 つの変更。**
 ずれたまま配ると、受け取った側はエラーを何も見ずに別物のメンターを使うことになる。
 リリースの CI もここで止まる。
 
-### `experiments/fixture/` は書き換えない
+### fixture は書き換えない。そしてリポジトリの中に置かない
 
-被験体が読むリポジトリ。**1 バイトでも変わると、それ以降の run は過去の run と比較できない。**
+被験体が読むリポジトリ。既定の場所は **`../learning-mentor-fixture`**（このリポジトリの外）。
+**1 バイトでも変わると、それ以降の run は過去の run と比較できない。**
 追跡外なので git は守ってくれない。`experiments/run.py` が各セルの前後で
 `verify-fixture.py` を呼んで止める。作り直しの手順は
 [experiments/README.md](experiments/README.md)。
+
+**リポジトリの中（`experiments/fixture`）に置いてはいけない。** cwd の祖先にある
+CLAUDE.md は被験体のプロジェクト指示として読み込まれるので、**このファイルが被験体に渡る。**
+規定が守られるかを測る実験で、被験体に規定の解説を渡すことになる。
+
+これは静かに壊れる。fixture の中身は無改変のままなので `verify-fixture.py` も
+`check-sync.ts` も通る。008 では 40 セル全部が検査を通り、`repo_sweep` 水準がたまたま
+このリポジトリの構成を説明し始めたことでようやく気づいた（issue #42）。
+いまは `verify-fixture.py` が「その場所で拾われる CLAUDE.md が無いこと」も見る。
 
 ### `experiments/runs/` は消さない・書き換えない
 

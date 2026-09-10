@@ -34,11 +34,26 @@
 
 ## fixture の作り直し
 
-`experiments/fixture/` は追跡していない（中身は upstream のもの）。**失うと作り直しが要る。**
+fixture は追跡していない（中身は upstream のもの）。**失うと作り直しが要る。**
+
+### 置き場所は、このリポジトリの外
+
+既定は `../learning-mentor-fixture`（リポジトリと並ぶ位置）。**`experiments/` の下に
+置いてはいけない。** cwd の祖先にある CLAUDE.md は被験体のプロジェクト指示として
+読み込まれるので、`experiments/fixture` に置くと**このリポジトリの CLAUDE.md が
+被験体に渡る**。規定が守られるかを測る実験で、被験体に規定の解説を渡すことになる。
+
+これは 008 で実際に起きた（issue #42）。fixture は最後まで無改変で、`verify-fixture.py`
+も `check-sync.ts` も全セル通っていた。**混入するのは fixture の中身ではなく、外の文脈。**
+`repo_sweep` 水準がたまたま親リポジトリの構成を説明し始めたことでようやく気づいた。
+
+場所の正は [`fixture_path.py`](fixture_path.py)。worktree ごとに別の fixture を使いたい
+ときは環境変数 `MENTOR_FIXTURE` で上書きする。既定では全 worktree が同じ fixture を
+共有する（読むだけなので競合しない）。
 
 ```
-git clone https://github.com/winc1980/2026-phase-2 experiments/fixture
-git -C experiments/fixture checkout 913c103e062e05d23dfa78c980d83a65d1e3f1c1
+git clone https://github.com/winc1980/2026-phase-2 ../learning-mentor-fixture
+git -C ../learning-mentor-fixture checkout 913c103e062e05d23dfa78c980d83a65d1e3f1c1
 ```
 
 固定 SHA の正は [`verify-fixture.py`](verify-fixture.py) の `PINNED_SHA`。上とずれたらそちらが正しい。
@@ -47,9 +62,9 @@ git -C experiments/fixture checkout 913c103e062e05d23dfa78c980d83a65d1e3f1c1
 （`.gitignore` に書くと fixture 自体の差分になる）。
 
 ```
-printf '.claude/\n' >> experiments/fixture/.git/info/exclude
-mkdir -p experiments/fixture/.claude/agents
-cp .claude/agents/learn.md experiments/fixture/.claude/agents/learn.md
+printf '.claude/\n' >> ../learning-mentor-fixture/.git/info/exclude
+mkdir -p ../learning-mentor-fixture/.claude/agents
+cp .claude/agents/learn.md ../learning-mentor-fixture/.claude/agents/learn.md
 ```
 
 **この配置が「無改変」の前提になっている。** `.claude/` がローカル除外されているので、
@@ -62,8 +77,23 @@ python experiments/verify-fixture.py
 bun check-sync.ts         # fixture の learn.md が本体プロンプトと一致しているか
 ```
 
+`verify-fixture.py` は中身の無改変に加えて、**その場所で被験体が拾う CLAUDE.md が
+無いこと**も見る。1つでもあれば NG になり、`run.py` は run を始めない。
+
 **`run.py` は各セルの実行前後で `verify-fixture.py` を呼び、NG なら run 全体を止める。**
 fixture が一度でも書き換わると、それ以降の run は過去の run と比較できなくなるため。
+
+---
+
+## 実験番号は別 worktree と衝突する
+
+番号はそのまま run ディレクトリ名になる。別 worktree で同じ番号の別実験を作っても、
+**ファイル名が違えば git は衝突として扱わない。** マージした瞬間に、どちらのデータか
+分からなくなる。実際に 007 で起きた（`007-a5-wexfine-pilot` と、当初 007 を名乗っていた
+`008-sonnet-worst`）。
+
+`run.py` は preflight で、ローカルの全ブランチの `experiments/specs/` を走査し、同じ番号を
+名乗る spec があれば run を始めない。**先に走ったほうが番号を保持する。**
 
 ---
 
