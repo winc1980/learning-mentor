@@ -1,4 +1,4 @@
-# 実験 007：最悪条件を sonnet で確認する（sonnet / n=5）
+# 実験 008：最悪条件を sonnet で確認する（sonnet / n=5）
 #
 # なぜ回すか：
 #   001（n=1）で sonnet に崩壊が見えなかったため、002 以降は opus だけで回してきた。
@@ -67,7 +67,7 @@
 #
 # 素のプロンプト（learn）を使う。v2-gate は使わない — 002・004 と比較するため。
 
-id: 007-sonnet-worst
+id: 008-sonnet-worst
 reps: 5          # 002・004 と同数にして直接比較する
 
 factors:

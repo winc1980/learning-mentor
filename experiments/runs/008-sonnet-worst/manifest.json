@@ -1,10 +1,10 @@
 {
-  "spec_id": "007-sonnet-worst",
+  "spec_id": "008-sonnet-worst",
   "実行日時": "2026-09-10T12:46:04.688414+00:00",
   "fixture_sha": "913c103e062e05d23dfa78c980d83a65d1e3f1c1",
   "claude_version": "2.1.263 (Claude Code)",
   "spec": {
-    "id": "007-sonnet-worst",
+    "id": "008-sonnet-worst",
     "reps": 5,
     "factors": {
       "model": [
@@ -65,6 +65,7 @@
     "fixture の README に『生成AIを使わないでほしい』の記述あり（全条件に等しくかかる定数）。",
     "【汚染・比較不可】被験体の文脈に、このリポジトリのルート CLAUDE.md がプロジェクト指示として入っている（cwd=experiments/fixture の祖先にあるため）。CLAUDE.md の作成は 2026-09-09（0697aa5）、この run は 09-10 実行。001〜006（09-06〜07 実行）には無かった条件なので、それらと比較できない。詳細は issue #42。",
     "【操作失敗】single_file / explain_two の loader が詳細解説になっていない（sonnet 184 / 254 字。004 の opus は 1,143 / 1,048 字）。経路1が要求する『直前に詳細解説を済ませた状態』に入っていないため、C・I の結果を経路1の検証として読んではいけない。上の CLAUDE.md 汚染が原因かモデル差かは、このデータでは切り分けられない。",
-    "【未採点】上記のため盲検採点は行っていない。judgments.jsonl・report.md は存在しない。ハーネス修正（#42）後に同じ spec を回し直す。"
+    "【未採点】上記のため盲検採点は行っていない。judgments.jsonl・report.md は存在しない。ハーネス修正（#42）後に同じ spec を回し直す。",
+    "【改番】当初 007 として実行したが、別 worktree の A-5（007-a5-wexfine-pilot、2026-09-09 実行）と番号が衝突していたため 008 に改番した。先に走ったほうが番号を保持する。cells/ の中身と実行時の spec は一切変えていない。"
   ]
 }
