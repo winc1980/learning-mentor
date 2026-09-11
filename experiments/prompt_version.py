@@ -33,6 +33,11 @@ manifest は取得時の事実の記録で、あとから git を見て推定し
 この issue で直そうとしている当のもの**なので、外の対応表に由来を明示して置く
 （`experiments/prompt-history.json`）。
 
+復元の経路は 2 つ。素の本文を使った run は当時の blob を引く。バリアントを使った run は
+**blob を引いてはいけない場合がある** — バリアントは生成物なので本体の更新時に作り直されて
+コミットし直され、引けば値が返るのに別の本文、という状態になる（`regenerate_variant` の注記）。
+その場合は当時の master と当時の生成器から作り直す。
+
 使い方:
     python experiments/prompt_version.py                  # いまの本文の同一性
     python experiments/prompt_version.py 012 013          # 並べてよいか判定（違えば exit 1）
@@ -46,6 +51,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -60,6 +66,7 @@ SOURCE = "learning-mentor-prompt.md"
 # 言えることが違う。推定を事実として扱わないため、必ず一緒に持ち回る。
 FROM_MANIFEST = "実行時に記録"
 FROM_GIT = "git復元（推定）"
+FROM_REGEN = "生成器で再生成（推定）"
 UNKNOWN = "不明"
 
 
@@ -118,6 +125,53 @@ def last_commit_before(relpath, when_iso):
         return None
     sha, date, subject = out.split("|", 2)
     return {"commit": sha, "日時": date, "件名": subject}
+
+
+def regenerate_variant(variant, master_commit, gen_commit):
+    """当時の master と当時の生成器からバリアントを作り直し、本文ハッシュを返す。
+
+    **git の blob を素直に引くと、間違った本文が返ることがある。** バリアントは
+    生成物なので、本体が更新されると作り直されてコミットし直される。実際
+    `a398e78` でコミットされた `v2-gate.md` は、同コミットの配布本文と本文が
+    完全に一致する（v2-gate を本体に取り込んだあと、新しい本文から作り直したもの）。
+    003・005・006 がその前に読んだ本文とは別物なのに、引けば値が返るので正しく見える。
+
+    生成器は決定論的なので、当時の入力を揃えて回せば当時の出力が得られる。
+    ただし**これも推定**である。生成後に手で直していれば分からない。
+
+    復元できなければ None を返す。
+    """
+    name = os.path.splitext(os.path.basename(variant))[0]
+    generator = os.path.join(os.path.dirname(variant), name + ".py").replace("\\", "/")
+
+    master = subprocess.run(["git", "-C", ROOT, "show", "%s:%s" % (master_commit, SOURCE)],
+                            capture_output=True, encoding="utf-8", errors="replace")
+    gen = subprocess.run(["git", "-C", ROOT, "show", "%s:%s" % (gen_commit, generator)],
+                         capture_output=True, encoding="utf-8", errors="replace")
+    if master.returncode != 0 or gen.returncode != 0:
+        return None
+
+    # 生成器は自分の位置から ROOT を決める（HERE の2つ上）。その形に並べる。
+    tmp = tempfile.mkdtemp(prefix="mentor-regen-")
+    try:
+        here = os.path.join(tmp, "experiments", "variants")
+        os.makedirs(here)
+        with io.open(os.path.join(tmp, "learning-mentor-prompt.md"), "w",
+                     encoding="utf-8", newline="\n") as f:
+            f.write(master.stdout)
+        script = os.path.join(here, name + ".py")
+        with io.open(script, "w", encoding="utf-8", newline="\n") as f:
+            f.write(gen.stdout)
+
+        # 履歴の中の生成器を実行する。--rebuild-history のときだけ通る道。
+        r = subprocess.run([sys.executable, script], capture_output=True,
+                           encoding="utf-8", errors="replace", cwd=tmp)
+        out = os.path.join(here, name + ".md")
+        if r.returncode != 0 or not os.path.exists(out):
+            return None
+        return hash_file(out, agent_body=True)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 def head_state():
@@ -312,17 +366,33 @@ def rebuild_history():
             vsrc = last_commit_before(variant, when)
             vhash = hash_blob(vsrc["commit"], variant, agent_body=True) if vsrc else None
             entry["バリアントの出どころ"] = vsrc
-            entry["被験体本文sha256"] = vhash
+
             if vhash:
+                entry["被験体本文sha256"] = vhash
                 entry["由来"] = FROM_GIT
+                runs[run_id] = entry
+                continue
+
+            # 003 / 005 / 006 がこれ。バリアント本文は生成器が作業ツリーに吐いたものを
+            # そのまま使い、git に入ったのは run のあと（a398e78）。blob は引けないが、
+            # 生成器は決定論的なので当時の入力から作り直せる。
+            gen = os.path.join(os.path.dirname(variant),
+                               os.path.splitext(os.path.basename(variant))[0] + ".py")
+            gsrc = last_commit_before(gen.replace("\\", "/"), when)
+            regen = (regenerate_variant(variant, src["commit"], gsrc["commit"])
+                     if (src and gsrc) else None)
+            entry["被験体本文sha256"] = regen
+            if regen:
+                entry["由来"] = FROM_REGEN
+                entry["再生成の入力"] = {"master": src["commit"], "生成器": gsrc["commit"]}
+                entry["復元の根拠"] = (
+                    "実行時点で %s は git に無い（コミットは run のあと）。当時の master と"
+                    "当時の生成器から作り直した。生成後に手で直していれば分からないので、"
+                    "これも推定。" % variant)
             else:
-                # 003 / 005 / 006 がこれ。バリアント本文は生成器が作業ツリーに吐いた
-                # ものをそのまま使い、git に入ったのは run のあと（a398e78）。
-                # 被験体が読んだ本文は git に無いので復元できない。
                 entry["由来"] = UNKNOWN
-                entry["理由"] = ("実行時点で %s が git に存在しません"
-                                "（生成器が作業ツリーに吐いたものを使い、コミットは run のあと）"
-                                % variant)
+                entry["理由"] = ("実行時点で %s が git に無く、生成器からの再生成も"
+                                "できませんでした" % variant)
         runs[run_id] = entry
 
     doc = {
