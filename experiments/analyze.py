@@ -4,8 +4,12 @@
 n が小さいうちは検定も平均も出さない。素の値を並べ、採点者間の一致だけを見る。
 採点者が割れている項目は、条件の効果ではなくルーブリックの問題である可能性が高い。
 
+**run を並べたら、本文が同じかを先に照合する。** 条件の差を読む前に、その差が
+プロンプトの差でないことを確かめる必要がある（#43）。判定は prompt_version.py。
+
 使い方:
     python experiments/analyze.py 001-context-dilution
+    python experiments/analyze.py 012-sonnet-path2 013-opus-path2   # 並べる
 """
 
 import argparse
@@ -16,6 +20,9 @@ import sys
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import prompt_version
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RUNS = os.path.join(ROOT, "experiments", "runs")
@@ -34,12 +41,8 @@ def by_cell(rows):
     return d
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("spec_id")
-    args = ap.parse_args()
-
-    rows = load(args.spec_id)
+def report(spec_id):
+    rows = load(spec_id)
     cells = by_cell(rows)
     judges = sorted(set(r["judge"] for r in rows))
 
@@ -120,7 +123,28 @@ def main():
                      r["probe_grain"], "/".join(str(v) for v in vals)))
     if not hit:
         print("  なし")
-    return 0
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("spec_id", nargs="+",
+                    help="集計する run。2つ以上並べると、先に本文が同じかを照合する")
+    args = ap.parse_args()
+
+    # 並べた時点で必ず通る。自己申告（report.md に「002 と比較」と書く）ではなく、
+    # 記録されたハッシュで判定する（#43）。
+    ok = prompt_version.warn_if_mixed(args.spec_id)
+
+    for spec_id in args.spec_id:
+        if len(args.spec_id) > 1:
+            print("=" * 72)
+            print("== %s ==" % spec_id)
+            print("=" * 72 + "\n")
+        else:
+            print(prompt_version.describe(prompt_version.of_run(spec_id)) + "\n")
+        report(spec_id)
+        print()
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":

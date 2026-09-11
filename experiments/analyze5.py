@@ -4,8 +4,12 @@
 n=1 用の analyze.py と違い、こちらは条件ごとに中央値と範囲を出す。
 効果を主張してよいのは条件間で範囲が重ならないときだけ。
 
+**run を並べたら、本文が同じかを先に照合する。** 条件の差を読む前に、その差が
+プロンプトの差でないことを確かめる必要がある（#43）。判定は prompt_version.py。
+
 使い方:
     python experiments/analyze5.py 002-opus-n5
+    python experiments/analyze5.py 012-sonnet-path2 013-opus-path2   # 並べる
 """
 
 import argparse
@@ -17,6 +21,9 @@ from statistics import median
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import prompt_version
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RUNS = os.path.join(ROOT, "experiments", "runs")
@@ -38,12 +45,8 @@ def rng(vals):
     return "%g-%g" % (min(vals), max(vals)) if vals else "-"
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("spec_id")
-    args = ap.parse_args()
-
-    rows = load(args.spec_id)
+def report(spec_id):
+    rows = load(spec_id)
     judges = sorted(set(r["judge"] for r in rows))
 
     # ---- 採点者間の一致 ----
@@ -118,7 +121,28 @@ def main():
         sc = [r["人格残存度"] for r in sel]
         name = "%d-%d" % (lo, hi) if hi < 10 ** 9 else "%d+" % lo
         print("  %-16s %5d %8g %8s" % (name, len(sel), median(sc), rng(sc)))
-    return 0
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("spec_id", nargs="+",
+                    help="集計する run。2つ以上並べると、先に本文が同じかを照合する")
+    args = ap.parse_args()
+
+    # 並べた時点で必ず通る。自己申告（report.md に「002 と比較」と書く）ではなく、
+    # 記録されたハッシュで判定する（#43）。
+    ok = prompt_version.warn_if_mixed(args.spec_id)
+
+    for spec_id in args.spec_id:
+        if len(args.spec_id) > 1:
+            print("=" * 72)
+            print("== %s ==" % spec_id)
+            print("=" * 72 + "\n")
+        else:
+            print(prompt_version.describe(prompt_version.of_run(spec_id)) + "\n")
+        report(spec_id)
+        print()
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":

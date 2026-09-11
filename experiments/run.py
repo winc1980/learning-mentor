@@ -10,6 +10,10 @@
     python experiments/run.py <spec> --only sonnet__none__fine__r1
     python experiments/run.py <spec> --dry-run       # プロンプト展開だけ見る
     python experiments/run.py <spec> --resume-run    # 完了済みセルを飛ばして再開
+
+spec に `compare_with: [002-opus-n5]` と書くと、回す前に「比較先と同じ本文で走るか」を
+照合し、違えば run を始めない（#43）。ヘッダのコメントに「○○と比較する」と書くだけでは
+誰も照合しない。実際 013 はそれで、モデルと本文の両方が違う比較になった。
 """
 
 import argparse
@@ -31,6 +35,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fixture_path
+import prompt_version
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # fixture はリポジトリの外に置く（issue #42）。experiments/ の下に置くと、
@@ -92,15 +97,59 @@ def spec_number_conflicts(spec_path, spec):
     return problems
 
 
-def preflight(spec_path=None, spec=None):
+def comparability(spec, allow_mismatch=False):
+    """spec が `compare_with:` で比較先の run を宣言していれば、本文が同じか照合する。
+
+    **これは回す前に効かなければ意味がない。** 013 では spec のヘッダに
+    「002 と比較するため」と書いたが、その間に本文が 2 回変わっていた。回したあとに
+    気づいても、比較先と揃った対照はもう一度取り直すしかない（実費がかかる）。
+
+    宣言が無ければ何もしない。宣言するかどうかは spec を書く人の判断だが、
+    ヘッダのコメントに「○○と比較する」と書くなら、ここにも書くこと。
+    コメントは誰も照合しない。
+    """
+    targets = spec.get("compare_with") or []
+    if not targets:
+        return True
+
+    now = prompt_version.current(agent_variant=spec.get("agent_variant"))
+    ids = [{"run": "（この run）",
+            "被験体本文sha256": now["被験体本文sha256"],
+            "バリアント": now["バリアント"],
+            "由来": now["由来"]}]
+    ids += [prompt_version.of_run(t) for t in targets]
+
+    hashes = set(i.get("被験体本文sha256") for i in ids)
+    if len(hashes) == 1 and None not in hashes:
+        print("比較先と本文が一致しています: %s" % ", ".join(targets))
+        return True
+
+    # 「違う」と「特定できない」を混ぜない。前者は取り直せば済むが、後者は
+    # 比較先そのものが使えない（その run の本文はもう復元できない）。
+    if None in hashes:
+        print("NG   比較先の本文を特定できません（spec の compare_with）:")
+    else:
+        print("NG   比較先と本文が違います（spec の compare_with）:")
+    for i in ids:
+        print("  " + prompt_version.describe(i))
+    print("  条件の差とプロンプトの差が分離できません。")
+    print("  比較先を現行本文で取り直すか、比較先の宣言を直してください。")
+    print("  違いを承知のうえで回すなら --allow-prompt-mismatch を付けます")
+    print("  （承知して回したことが manifest に残ります）。")
+    return bool(allow_mismatch)
+
+
+def preflight(spec_path=None, spec=None, allow_prompt_mismatch=False):
     """本体プロンプトと fixture 側コピーがずれていないか、fixture が無改変か、
-    実験番号が他のブランチと衝突していないか。"""
+    実験番号が他のブランチと衝突していないか、比較先と本文が揃っているか。"""
     if spec_path and spec:
         problems = spec_number_conflicts(spec_path, spec)
         if problems:
             print("NG   spec の番号・命名に問題があります:")
             for p in problems:
                 print("  - " + p)
+            return False
+        if not comparability(spec, allow_prompt_mismatch):
             return False
 
     print("fixture: %s" % FIXTURE)
@@ -330,6 +379,8 @@ def main():
     ap.add_argument("--only", help="このセルIDだけ実行")
     ap.add_argument("--dry-run", action="store_true", help="送信文の展開だけ表示")
     ap.add_argument("--resume-run", action="store_true", help="完了済みセルを飛ばす")
+    ap.add_argument("--allow-prompt-mismatch", action="store_true",
+                    help="compare_with の比較先と本文が違っても回す（manifest に残る）")
     args = ap.parse_args()
 
     with io.open(args.spec, encoding="utf-8") as f:
@@ -346,13 +397,13 @@ def main():
             print("=" * 68)
             print(c["id"])
             for t in spec["turns"]:
-                body = turn_text(spec, t, c).replace("\n", "\n          ")
-                print("  [%-6s] %s" % (t["id"], body))
+                line = turn_text(spec, t, c).replace("\n", "\n          ")
+                print("  [%-6s] %s" % (t["id"], line))
         print("\n合計 %d セル / %d ターン"
               % (len(cells), len(cells) * len(spec["turns"])))
         return 0
 
-    if not preflight(args.spec, spec):
+    if not preflight(args.spec, spec, args.allow_prompt_mismatch):
         return 1
 
     # プロンプト自体を実験条件にする場合。バリアント定義を fixture の
@@ -376,6 +427,16 @@ def main():
         with io.open(dest, "w", encoding="utf-8", newline="\n") as f:
             f.write(vtext)
         print("バリアント使用: --agent %s （%s）" % (agent, variant))
+
+    # この run がどの本文で走ったかを、**被験体が実際に読むファイルから**取る（#43）。
+    # リポジトリ側の learning-mentor-prompt.md ではなく fixture 側のエージェント定義を
+    # 見るので、推定が入らない。取るのは 1 セル目の前。manifest を書く最後に取ると、
+    # run の途中で本文を編集したときに「走った本文とは違うハッシュ」が記録される。
+    subject_agent = os.path.join(FIXTURE, ".claude", "agents", agent + ".md")
+    body = prompt_version.current(subject_agent, variant)
+    print("本文: %s （%s）" % (body["被験体本文sha256"][:12],
+                            "配布本文と同一" if body["被験体本文sha256"] == body["配布本文sha256"]
+                            else "バリアント"))
 
     run_dir = os.path.join(RUNS, spec["id"])
     os.makedirs(os.path.join(run_dir, "cells"), exist_ok=True)
@@ -467,6 +528,17 @@ def main():
                 json.dump({"cell": c, "metrics_row": row}, f, ensure_ascii=False, indent=2)
 
     # manifest：あとから「どういう条件で取ったデータか」を復元できるようにする
+    #
+    # 本文は 1 セル目の前に取ってある。ここでもう一度取って、run の途中で
+    # 変わっていないかを見る。fixture の .claude/ はローカル除外されているので
+    # verify-fixture.py の `git status --porcelain` では捕まらない経路。
+    after = prompt_version.current(subject_agent, variant)
+    if after["被験体本文sha256"] != body["被験体本文sha256"]:
+        print("  !! run の途中で本文が変わりました。%s -> %s"
+              % (body["被験体本文sha256"][:12], after["被験体本文sha256"][:12]))
+        print("     セルごとに違う本文で走っています。この run は比較に使えません。")
+        body = dict(body, 途中で変わった=True, 終了時sha256=after["被験体本文sha256"])
+
     head = subprocess.run(["git", "-C", FIXTURE, "rev-parse", "HEAD"],
                           capture_output=True, text=True).stdout.strip()
     ver = subprocess.run([claude_bin(), "--version"],
@@ -477,6 +549,15 @@ def main():
             "spec_id": spec["id"],
             "実行日時": datetime.now(timezone.utc).isoformat(),
             "fixture_path": FIXTURE,
+            # この run がどの本文で走ったか（#43）。fixture の SHA も claude の
+            # バージョンも残っていたのに、**肝心の配布本文だけが残っていなかった。**
+            # 無いと「過去の run と比較してよいか」を後から判定できず、比較した結果の
+            # 解釈だけが静かに間違う。読み方と照合は prompt_version.py。
+            "本文": body,
+            # compare_with の不一致を承知で回したか。承知なら記録に残す。残さないと、
+            # あとから見た人には「気づかずに回した run」と区別がつかない。
+            "比較先との本文不一致を許可": bool(args.allow_prompt_mismatch
+                                     and spec.get("compare_with")),
             # 被験体の文脈に混入した CLAUDE.md。preflight が空でなければ止めるので
             # 通常は [] になるが、記録が無いと後から「無かった」ことを示せない（#42）。
             "混入した CLAUDE_md": fixture_path.claude_md_in_scope(FIXTURE),
