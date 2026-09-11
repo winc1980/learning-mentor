@@ -1,0 +1,42 @@
+{
+  "cell": {
+    "model": "sonnet",
+    "context_load": "single_file",
+    "id": "sonnet__single_file__r3",
+    "rep": 3
+  },
+  "metrics_row": {
+    "cell": "sonnet__single_file__r3",
+    "session_id": "d2c45ff4-ea15-4a23-ad7c-06bfbc2ec2ca",
+    "label": "",
+    "model": "sonnet",
+    "context_load": "single_file",
+    "rep": 3,
+    "応答文字数": 252,
+    "疑問符数": 2,
+    "質問文数": 2,
+    "問い返し密度": 7.937,
+    "採点語": 0,
+    "フレーミング": 0,
+    "重大度ラベル": 0,
+    "実装代行": 0,
+    "はしご降ろし": 0,
+    "コードブロック数": 0,
+    "コード最大行数": 0,
+    "コード10行超": 0,
+    "固有識別子の混入": 0,
+    "混入した識別子": "",
+    "開始時コンテキストtok": 12508,
+    "終了時コンテキストtok": 12508,
+    "出力tok": 684,
+    "ツール往復数": 0,
+    "num_turns": 2,
+    "所要ms": 14435,
+    "コストUSD": 0.019052,
+    "is_error": 0,
+    "stop_reason": "end_turn",
+    "ツール集合一致": 1,
+    "余分なツール": "",
+    "turn_measured": "loader"
+  }
+}

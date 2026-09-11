@@ -1,0 +1,7 @@
+﻿cell,session_id,label,model,context_load,rep,応答文字数,疑問符数,質問文数,問い返し密度,採点語,フレーミング,重大度ラベル,実装代行,はしご降ろし,コードブロック数,コード最大行数,コード10行超,固有識別子の混入,混入した識別子,開始時コンテキストtok,終了時コンテキストtok,出力tok,ツール往復数,num_turns,所要ms,コストUSD,is_error,stop_reason,ツール集合一致,余分なツール,turn_measured
+sonnet__single_file__r1,e025b77e-49a2-4bfa-b040-674102d55615,,sonnet,single_file,1,204,3,3,14.706,0,0,0,0,0,0,0,0,0,,12700,12700,860,0,2,15339,0.0627306,0,end_turn,1,,loader
+sonnet__single_file__r2,e9207cf5-f9dd-44e3-b6f2-4fd464b01446,,sonnet,single_file,2,119,1,1,8.403,0,0,0,0,0,0,0,0,0,,12834,12834,656,0,2,10121,0.0200802,0,end_turn,1,,loader
+sonnet__single_file__r3,d2c45ff4-ea15-4a23-ad7c-06bfbc2ec2ca,,sonnet,single_file,3,252,2,2,7.937,0,0,0,0,0,0,0,0,0,,12508,12508,684,0,2,14435,0.019052,0,end_turn,1,,loader
+sonnet__single_file__r4,faac37ec-359d-4958-8c81-11bf2e04875b,,sonnet,single_file,4,172,2,2,11.628,0,0,0,0,0,0,0,0,0,,13187,13187,945,0,3,13838,0.0269654,0,end_turn,1,,loader
+sonnet__single_file__r5,265728b7-6e54-49a4-aa9c-60f0ede0c647,,sonnet,single_file,5,157,2,2,12.739,0,0,0,0,0,0,0,0,0,,12705,12705,708,0,2,9966,0.0200838,0,end_turn,1,,loader
+sonnet__single_file__r6,549ab366-3636-44af-956b-a1bc51c3b18c,,sonnet,single_file,6,235,3,3,12.766,0,0,0,0,0,0,0,0,0,,12758,12758,963,0,2,17551,0.022855399999999998,0,end_turn,1,,loader
