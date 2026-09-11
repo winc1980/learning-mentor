@@ -1,0 +1,220 @@
+{
+  "init": {
+    "type": "system",
+    "subtype": "init",
+    "cwd": "C:\\Users\\stama\\winc\\general\\learning-mentor\\experiments\\fixture",
+    "session_id": "e142bbd8-afb8-4f11-a9eb-d5f5f394fc01",
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "mcp_servers": [],
+    "model": "claude-sonnet-5",
+    "permissionMode": "default",
+    "slash_commands": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator",
+      "advisor",
+      "agents",
+      "auto-mode-setup",
+      "autocompact",
+      "clear",
+      "color",
+      "compact",
+      "config",
+      "context",
+      "effort",
+      "fast",
+      "heapdump",
+      "init",
+      "mcp",
+      "import",
+      "model",
+      "__remote-workflow",
+      "workflow-launch-exec",
+      "reload-plugins",
+      "reload-skills",
+      "rename",
+      "ultrareview",
+      "security-review",
+      "usage-credits",
+      "extra-usage",
+      "usage",
+      "insights",
+      "recap",
+      "skill-doctor",
+      "goal",
+      "design-consent",
+      "design-revoke",
+      "list-agents",
+      "team-onboarding"
+    ],
+    "terminal_slash_commands": [
+      "doctor",
+      "color",
+      "reload-plugins"
+    ],
+    "apiKeySource": "none",
+    "claude_code_version": "2.1.263",
+    "output_style": "default",
+    "agents": [
+      "claude",
+      "claude-code-guide",
+      "Explore",
+      "general-purpose",
+      "learn",
+      "Plan",
+      "statusline-setup",
+      "v2-gate"
+    ],
+    "skills": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator"
+    ],
+    "plugins": [],
+    "capabilities": [
+      "interrupt_receipt_v1",
+      "interrupt_cancel_queued_v1",
+      "msg_lifecycle_v1"
+    ],
+    "analytics_disabled": false,
+    "product_feedback_disabled": false,
+    "uuid": "1b0696bf-10e0-4642-ae60-0cb2d8572f9e",
+    "memory_paths": {
+      "auto": "C:\\Users\\stama\\.claude\\projects\\C--Users-stama-winc-general-learning-mentor-experiments-fixture\\memory\\"
+    },
+    "messaging_socket_path": "\\\\.\\pipe\\LOCAL\\cc-msg-349b9078ed3d20b50e7183a435235060",
+    "fast_mode_state": "off",
+    "powershell_path": "C:\\Users\\stama\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe"
+  },
+  "result": {
+    "duration_api_ms": 15032,
+    "stop_reason": "end_turn",
+    "session_id": "e142bbd8-afb8-4f11-a9eb-d5f5f394fc01",
+    "total_cost_usd": 0.036161,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 3264,
+      "cache_read_input_tokens": 60585,
+      "output_tokens": 1098,
+      "output_tokens_details": {
+        "thinking_tokens": 882
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 3264,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 829,
+          "cache_read_input_tokens": 31688,
+          "cache_creation_input_tokens": 473,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 473
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-sonnet-5": {
+        "inputTokens": 4,
+        "outputTokens": 1098,
+        "cacheReadInputTokens": 60585,
+        "cacheCreationInputTokens": 3264,
+        "webSearchRequests": 0,
+        "costUSD": 0.036161,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 882,
+        "canonicalModel": "claude-sonnet-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 2,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "`hash.ts` 見ました。`bcrypt.hash(password, SALT_ROUNDS)` に渡している数字ですね。\n\n先に一つだけ確認させてください。パスワードを保存するときに「ハッシュ化する」とか「ソルト」という言葉、聞いたことはありますか？ 「なんとなく」でも「ない」でも大丈夫です。",
+    "ttft_ms": 3322,
+    "type": "result",
+    "duration_ms": 15169,
+    "uuid": "627f0a78-fadc-49d4-aa4d-bedef29258d3",
+    "ttft_stream_ms": 1048,
+    "time_to_request_ms": 89,
+    "first_content_frame_ms": 1849,
+    "queued_turn_count": 0
+  }
+}

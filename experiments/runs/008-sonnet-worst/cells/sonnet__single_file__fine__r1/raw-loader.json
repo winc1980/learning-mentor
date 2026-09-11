@@ -1,0 +1,234 @@
+{
+  "init": {
+    "type": "system",
+    "subtype": "init",
+    "cwd": "C:\\Users\\stama\\winc\\general\\learning-mentor\\experiments\\fixture",
+    "session_id": "951f2b6d-b693-4b91-939c-221f4e5798e9",
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "mcp_servers": [],
+    "model": "claude-sonnet-5",
+    "permissionMode": "default",
+    "slash_commands": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator",
+      "advisor",
+      "agents",
+      "auto-mode-setup",
+      "autocompact",
+      "clear",
+      "color",
+      "compact",
+      "config",
+      "context",
+      "effort",
+      "fast",
+      "heapdump",
+      "init",
+      "mcp",
+      "import",
+      "model",
+      "__remote-workflow",
+      "workflow-launch-exec",
+      "reload-plugins",
+      "reload-skills",
+      "rename",
+      "ultrareview",
+      "security-review",
+      "usage-credits",
+      "extra-usage",
+      "usage",
+      "insights",
+      "recap",
+      "skill-doctor",
+      "goal",
+      "design-consent",
+      "design-revoke",
+      "list-agents",
+      "team-onboarding"
+    ],
+    "terminal_slash_commands": [
+      "doctor",
+      "color",
+      "reload-plugins"
+    ],
+    "apiKeySource": "none",
+    "claude_code_version": "2.1.263",
+    "output_style": "default",
+    "agents": [
+      "claude",
+      "claude-code-guide",
+      "Explore",
+      "general-purpose",
+      "learn",
+      "Plan",
+      "statusline-setup",
+      "v2-gate"
+    ],
+    "skills": [
+      "design",
+      "design-sync",
+      "dataviz",
+      "artifact-diagramming",
+      "artifact-capabilities",
+      "update-config",
+      "verify",
+      "debug",
+      "code-review",
+      "simplify",
+      "batch",
+      "fewer-permission-prompts",
+      "doctor",
+      "loop",
+      "schedule",
+      "claude-api",
+      "run",
+      "run-skill-generator"
+    ],
+    "plugins": [],
+    "capabilities": [
+      "interrupt_receipt_v1",
+      "interrupt_cancel_queued_v1",
+      "msg_lifecycle_v1"
+    ],
+    "analytics_disabled": false,
+    "product_feedback_disabled": false,
+    "uuid": "9b526d90-6af9-4839-b136-24261cf424d2",
+    "memory_paths": {
+      "auto": "C:\\Users\\stama\\.claude\\projects\\C--Users-stama-winc-general-learning-mentor-experiments-fixture\\memory\\"
+    },
+    "messaging_socket_path": "\\\\.\\pipe\\LOCAL\\cc-msg-0249464b1b4c80d424084dbfe9d97042",
+    "fast_mode_state": "off",
+    "powershell_path": "C:\\Users\\stama\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe"
+  },
+  "result": {
+    "duration_api_ms": 26993,
+    "stop_reason": "end_turn",
+    "session_id": "951f2b6d-b693-4b91-939c-221f4e5798e9",
+    "total_cost_usd": 0.046093800000000004,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 5972,
+      "cache_read_input_tokens": 25454,
+      "output_tokens": 1610,
+      "output_tokens_details": {
+        "thinking_tokens": 1375
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 5972,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "not_available",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 145,
+          "cache_read_input_tokens": 14631,
+          "cache_creation_input_tokens": 2164,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 2164
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard"
+    },
+    "modelUsage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 917,
+        "outputTokens": 18,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.0010069999999999999,
+        "contextWindow": 200000,
+        "maxOutputTokens": 32000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-4-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-sonnet-5": {
+        "inputTokens": 4,
+        "outputTokens": 1610,
+        "cacheReadInputTokens": 25454,
+        "cacheCreationInputTokens": 5972,
+        "webSearchRequests": 0,
+        "costUSD": 0.045086799999999996,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 64000,
+        "thinkingTokens": 1375,
+        "canonicalModel": "claude-sonnet-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "is_error": false,
+    "num_turns": 2,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "ファイルはもう読みました。中身の説明に入る前に、一つだけ聞かせてください。\n\nこのファイル、**何がきっかけで見ることになりましたか？**（例：他のファイルから `import` で辿ってきた、エラーメッセージに出てきた、たまたま気になった、など）\n\n正確じゃなくて大丈夫です。そこが分かると、どこから説明を始めればいいか決めやすいので。",
+    "ttft_ms": 21494,
+    "type": "result",
+    "duration_ms": 25937,
+    "uuid": "38870ec4-03a8-4284-b3bb-876f95705e3d",
+    "ttft_stream_ms": 1705,
+    "time_to_request_ms": 77,
+    "first_content_frame_ms": 2808,
+    "queued_turn_count": 0
+  }
+}

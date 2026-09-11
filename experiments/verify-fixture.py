@@ -24,8 +24,12 @@ import sys
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import fixture_path
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FIXTURE = os.path.join(ROOT, "experiments", "fixture")
+# fixture はリポジトリの外に置く（issue #42）。場所の正は fixture_path.py。
+FIXTURE = fixture_path.resolve()
 PINNED_SHA = "913c103e062e05d23dfa78c980d83a65d1e3f1c1"
 AGENT_REL = os.path.join(".claude", "agents", "learn.md")
 
@@ -41,7 +45,10 @@ def check(expected_sha):
     problems = []
 
     if not os.path.isdir(os.path.join(FIXTURE, ".git")):
-        return ["fixture が存在しません: %s" % FIXTURE]
+        return ["fixture が存在しません: %s\n"
+                "    作り直しの手順は experiments/README.md。\n"
+                "    別の場所を使うなら環境変数 %s で指定する。"
+                % (FIXTURE, fixture_path.ENV_VAR)]
 
     head = git("rev-parse", "HEAD").stdout.strip()
     if head != expected_sha:
@@ -62,6 +69,16 @@ def check(expected_sha):
     if not os.path.exists(os.path.join(FIXTURE, AGENT_REL)):
         problems.append("メンター定義がありません: %s" % AGENT_REL)
 
+    # 中身が無改変でも、外から文脈が混入すれば実験は壊れる（issue #42）。
+    # fixture の SHA も porcelain も正常なまま起きるので、ここで一緒に見る。
+    leaks = fixture_path.claude_md_in_scope(FIXTURE)
+    if leaks:
+        problems.append(
+            "被験体の文脈に CLAUDE.md が混入します:\n"
+            + "\n".join("    " + x for x in leaks)
+            + "\n    規定順守を測る実験で、被験体に規定の解説を渡すことになります。"
+            + "\n    祖先に CLAUDE.md が無い場所へ fixture を移してください（issue #42）。")
+
     return problems
 
 
@@ -81,6 +98,7 @@ def main():
 
     if not args.quiet:
         print("OK   fixture は無改変です（%s）" % args.sha[:12])
+        print("     %s" % FIXTURE)
     return 0
 
 

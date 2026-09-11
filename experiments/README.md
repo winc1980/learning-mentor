@@ -13,10 +13,18 @@
 （直前に詳細解説を済ませている／広い質問が来る）に特定し、プロンプト2箇所の修正（v2-gate）で
 崩壊していた4条件を 0〜2/10 から 10/10 に戻した。退行なし。
 
-**測ったもの。** 102セル / 204ターン / 全12名の盲検採点。すべて opus、すべて固定台本、すべて Claude Code。
+**測ったもの。** 102セル / 204ターン（001〜006、すべて opus）に加えて、012・013 の 30セル / 60ターン。
+**モデル差は規定順守に出なかった** ── 現行の配布本文なら opus も sonnet も経路2で崩れない（012・013）。
+002 で opus が 0/10 まで落ちたのは v2-gate 取り込み前の本文での話で、あれはモデルの性質ではなく本文の性質だった。
+差が出たのは説明量（opus が約1.4倍）と費用（opus が約2.0倍）だけ。
 
 **測っていないもの。** 大きい順に：本体プロンプトの約4割を占めるレビュー／トラブルモードが
 一度も発火していない（#3）。実学習者で一度も試していない（#4）。3ターン目以降の規定が全部未測定（#13）。
+**解説の分かりやすさ・正しさは一度も測っていない**（測っているのは規定を守るかどうかだけ）。
+経路1でのモデル差も測れていない ── sonnet はそもそもその状態に入らないため（011）。
+
+**run をまたいで比べるときは、配布本文のバージョンを確認すること。** manifest に残っていないので、
+本文の違う run を並べても何も警告が出ない（#43）。001〜004 は v2-gate 前、008 以降は現行本文。
 
 | run | 何を見たか |
 |---|---|
@@ -26,6 +34,10 @@
 | 004 | 深さ仮説。**コンテキスト量ではなく直前ターンの種類が効くと判明** |
 | 005 | v2-gate が経路1を戻すか |
 | 006 | v2-gate の退行チェック |
+| 008 | sonnet の最悪条件（**CLAUDE.md 混入。未採点・比較不可**、#42） |
+| 011 | 混入が loader の字数に効いたかの切り分け。**効いていなかった** |
+| 012 | 経路2を sonnet で（現行本文）。崩れない |
+| 013 | 経路2を opus で（現行本文・012 の対照）。**こちらも崩れない** |
 
 **ルーブリックは版2。** 版1（001〜006）とは **L3/L4 の意味が逆**。読み替え規則は [rubric.md](rubric.md)。
 集計時に版を混ぜると静かに壊れる（#21）。
@@ -34,11 +46,26 @@
 
 ## fixture の作り直し
 
-`experiments/fixture/` は追跡していない（中身は upstream のもの）。**失うと作り直しが要る。**
+fixture は追跡していない（中身は upstream のもの）。**失うと作り直しが要る。**
+
+### 置き場所は、このリポジトリの外
+
+既定は `../learning-mentor-fixture`（リポジトリと並ぶ位置）。**`experiments/` の下に
+置いてはいけない。** cwd の祖先にある CLAUDE.md は被験体のプロジェクト指示として
+読み込まれるので、`experiments/fixture` に置くと**このリポジトリの CLAUDE.md が
+被験体に渡る**。規定が守られるかを測る実験で、被験体に規定の解説を渡すことになる。
+
+これは 008 で実際に起きた（issue #42）。fixture は最後まで無改変で、`verify-fixture.py`
+も `check-sync.ts` も全セル通っていた。**混入するのは fixture の中身ではなく、外の文脈。**
+`repo_sweep` 水準がたまたま親リポジトリの構成を説明し始めたことでようやく気づいた。
+
+場所の正は [`fixture_path.py`](fixture_path.py)。worktree ごとに別の fixture を使いたい
+ときは環境変数 `MENTOR_FIXTURE` で上書きする。既定では全 worktree が同じ fixture を
+共有する（読むだけなので競合しない）。
 
 ```
-git clone https://github.com/winc1980/2026-phase-2 experiments/fixture
-git -C experiments/fixture checkout 913c103e062e05d23dfa78c980d83a65d1e3f1c1
+git clone https://github.com/winc1980/2026-phase-2 ../learning-mentor-fixture
+git -C ../learning-mentor-fixture checkout 913c103e062e05d23dfa78c980d83a65d1e3f1c1
 ```
 
 固定 SHA の正は [`verify-fixture.py`](verify-fixture.py) の `PINNED_SHA`。上とずれたらそちらが正しい。
@@ -47,9 +74,9 @@ git -C experiments/fixture checkout 913c103e062e05d23dfa78c980d83a65d1e3f1c1
 （`.gitignore` に書くと fixture 自体の差分になる）。
 
 ```
-printf '.claude/\n' >> experiments/fixture/.git/info/exclude
-mkdir -p experiments/fixture/.claude/agents
-cp .claude/agents/learn.md experiments/fixture/.claude/agents/learn.md
+printf '.claude/\n' >> ../learning-mentor-fixture/.git/info/exclude
+mkdir -p ../learning-mentor-fixture/.claude/agents
+cp .claude/agents/learn.md ../learning-mentor-fixture/.claude/agents/learn.md
 ```
 
 **この配置が「無改変」の前提になっている。** `.claude/` がローカル除外されているので、
@@ -62,8 +89,23 @@ python experiments/verify-fixture.py
 bun check-sync.ts         # fixture の learn.md が本体プロンプトと一致しているか
 ```
 
+`verify-fixture.py` は中身の無改変に加えて、**その場所で被験体が拾う CLAUDE.md が
+無いこと**も見る。1つでもあれば NG になり、`run.py` は run を始めない。
+
 **`run.py` は各セルの実行前後で `verify-fixture.py` を呼び、NG なら run 全体を止める。**
 fixture が一度でも書き換わると、それ以降の run は過去の run と比較できなくなるため。
+
+---
+
+## 実験番号は別 worktree と衝突する
+
+番号はそのまま run ディレクトリ名になる。別 worktree で同じ番号の別実験を作っても、
+**ファイル名が違えば git は衝突として扱わない。** マージした瞬間に、どちらのデータか
+分からなくなる。実際に 007 で起きた（`007-a5-wexfine-pilot` と、当初 007 を名乗っていた
+`008-sonnet-worst`）。
+
+`run.py` は preflight で、ローカルの全ブランチの `experiments/specs/` を走査し、同じ番号を
+名乗る spec があれば run を始めない。**先に走ったほうが番号を保持する。**
 
 ---
 
@@ -103,5 +145,6 @@ python experiments/analyze.py 006-v2gate-regression      # 条件ごとに集計
 | `specs/*.yaml` | 実験の定義。要因・水準・反復数・モデル。**冒頭のコメントに、その実験で何を見るかを書く** |
 | `variants/` | プロンプトのバリアント（`v2-gate.md`, `wex-fine.md`）。`.py` が生成元 |
 | `runs/<id>/` | 実行結果。`blind/`, `judgments.jsonl`, `metrics.csv`, `report.md` |
-| `fixture/` | 被験体が読むリポジトリ（追跡外。上記の手順で作り直す） |
+| `../../learning-mentor-fixture/` | 被験体が読むリポジトリ。**リポジトリの外**（追跡外。上記の手順で作り直す） |
+| `fixture_path.py` | fixture の場所の解決規則と、CLAUDE.md 混入の検査 |
 | `rubric.md` | 採点基準。**版の読み替え規則もここ** |

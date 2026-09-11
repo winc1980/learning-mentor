@@ -1,5 +1,11 @@
-# 検証用に clone した 2026-phase-2。中身は upstream のものなので追跡しない。
-# 作り直しは experiments/README.md の手順を参照（commit SHA もそこに固定してある）。
+# 【旧配置・使わない】fixture の置き場所は ../learning-mentor-fixture に移した（#42）。
+# ここに置くと、cwd の祖先にあるこのリポジトリの CLAUDE.md が被験体のプロジェクト指示
+# として読み込まれ、規定順守を測る実験で被験体に規定の解説を渡すことになる。
+# 作り直しの手順と正しい置き場所は experiments/README.md。
+#
+# 行を残してあるのは、旧配置の clone が worktree に残っているため。中に .git/ を持つので、
+# 無視を外すと git add -A で upstream の clone 丸ごとが gitlink としてコミットされる。
+# **ここが正しい置き場所という意味ではない。** 旧 clone は消してよい。
 experiments/fixture/
 
 # runs/ は追跡する。実験データ本体なので消してはいけない。

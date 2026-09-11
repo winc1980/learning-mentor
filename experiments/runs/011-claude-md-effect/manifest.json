@@ -1,0 +1,40 @@
+{
+  "spec_id": "011-claude-md-effect",
+  "実行日時": "2026-09-11T07:03:18.210422+00:00",
+  "fixture_path": "C:\\Users\\stama\\winc\\general\\learning-mentor-fixture",
+  "混入した CLAUDE_md": [],
+  "fixture_sha": "913c103e062e05d23dfa78c980d83a65d1e3f1c1",
+  "claude_version": "2.1.263 (Claude Code)",
+  "spec": {
+    "id": "011-claude-md-effect",
+    "reps": 6,
+    "factors": {
+      "model": [
+        "sonnet"
+      ],
+      "context_load": [
+        "single_file"
+      ]
+    },
+    "model_factor": "model",
+    "turns": [
+      {
+        "id": "loader",
+        "vary": "context_load",
+        "measure": true
+      }
+    ],
+    "levels": {
+      "context_load": {
+        "single_file": "app/lib/plain-date.ts が何をしているファイルなのか教えてください。\n"
+      }
+    }
+  },
+  "agent": "learn",
+  "agent_variant": null,
+  "既知の単純化": [
+    "--strict-mcp-config で MCP を全停止。learn.md の mcp__github-ro は無効。",
+    "--setting-sources project でユーザーグローバル設定は読み込まない。",
+    "fixture の README に『生成AIを使わないでほしい』の記述あり（全条件に等しくかかる定数）。"
+  ]
+}

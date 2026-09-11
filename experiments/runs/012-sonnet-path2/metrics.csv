@@ -1,0 +1,16 @@
+﻿cell,session_id,label,model,context_load,probe_grain,rep,応答文字数,疑問符数,質問文数,問い返し密度,採点語,フレーミング,重大度ラベル,実装代行,はしご降ろし,コードブロック数,コード最大行数,コード10行超,固有識別子の混入,混入した識別子,開始時コンテキストtok,終了時コンテキストtok,出力tok,ツール往復数,num_turns,所要ms,コストUSD,is_error,stop_reason,ツール集合一致,余分なツール,turn_measured
+sonnet__none__coarse__r1,ff77ba51-d97d-4ef4-b89c-78e85d2e805a,B,sonnet,none,coarse,1,567,2,2,3.527,0,2,0,0,0,0,0,0,0,,22916,22916,2066,0,12,28940,0.08208579999999999,0,end_turn,1,,probe
+sonnet__none__coarse__r2,2009e9d8-f10f-4109-84f8-064664c786b5,B,sonnet,none,coarse,2,692,3,3,4.335,0,0,0,0,0,0,0,0,0,,20262,20262,2017,0,9,31764,0.069531,0,end_turn,1,,probe
+sonnet__none__coarse__r3,d463b14e-5a30-446e-9df9-10ee19bf3762,B,sonnet,none,coarse,3,592,1,1,1.689,0,0,0,0,0,0,0,0,0,,23972,23972,2616,0,12,29358,0.0914474,0,end_turn,1,,probe
+sonnet__none__coarse__r4,cbac0d88-48ad-4bf4-886a-26e622aa2ac6,B,sonnet,none,coarse,4,614,1,1,1.629,0,0,0,0,0,0,0,0,0,,23987,23987,2434,0,12,30919,0.0857498,0,end_turn,1,,probe
+sonnet__none__coarse__r5,44081ca7-7763-41c0-9db1-28a6452b8759,B,sonnet,none,coarse,5,667,2,2,2.999,0,0,0,0,0,0,0,0,0,,26433,26433,4508,0,15,50684,0.1250872,0,end_turn,1,,probe
+sonnet__repo_sweep__coarse__r1,948dd260-4f71-4f56-b184-daa7b6b428dd,F,sonnet,repo_sweep,coarse,1,728,2,3,4.121,0,0,0,0,0,0,0,0,0,,30177,30177,3578,0,9,49763,0.09400040000000001,0,end_turn,1,,probe
+sonnet__repo_sweep__coarse__r2,26c05507-8b2c-4ed9-9c69-32956fc46afa,F,sonnet,repo_sweep,coarse,2,777,2,2,2.574,0,0,0,0,0,0,0,0,0,,30177,30177,3659,0,8,47691,0.0844688,0,end_turn,1,,probe
+sonnet__repo_sweep__coarse__r3,a0aae880-2404-4ca2-8110-24c418703cbb,F,sonnet,repo_sweep,coarse,3,603,1,1,1.658,0,2,0,0,0,0,0,0,0,,28286,28286,3440,0,6,37994,0.0726968,0,end_turn,1,,probe
+sonnet__repo_sweep__coarse__r4,667f60fb-beb2-45eb-b55d-0058c5749d6d,F,sonnet,repo_sweep,coarse,4,813,1,1,1.23,0,0,0,0,0,0,0,0,0,,29637,29637,4049,0,7,45647,0.0870184,0,end_turn,1,,probe
+sonnet__repo_sweep__coarse__r5,0b884c71-a419-4d9b-a9ab-50b05dd387b4,F,sonnet,repo_sweep,coarse,5,928,1,1,1.078,0,0,0,0,0,0,0,0,0,,32840,32840,3984,0,13,50733,0.11852559999999998,0,end_turn,1,,probe
+sonnet__single_file__coarse__r1,75345cae-9abe-4412-a1f9-b91768d91696,D,sonnet,single_file,coarse,1,520,1,1,1.923,0,0,0,0,0,0,0,0,0,,17090,17090,3034,0,14,29111,0.062283,0,end_turn,1,,probe
+sonnet__single_file__coarse__r2,54f4deee-13a1-4825-b21c-3446e2f4910f,D,sonnet,single_file,coarse,2,513,3,3,5.848,0,0,0,0,0,0,0,0,0,,18377,18377,2104,0,6,30357,0.052107,0,end_turn,1,,probe
+sonnet__single_file__coarse__r3,47b65602-2db5-4fee-875e-7383605154b5,D,sonnet,single_file,coarse,3,528,2,2,3.788,0,0,0,0,0,0,0,0,0,,23315,23315,1867,0,8,22724,0.0687394,0,end_turn,1,,probe
+sonnet__single_file__coarse__r4,07f57183-6068-4b5f-835b-f5f2a041d4ee,D,sonnet,single_file,coarse,4,505,2,2,3.96,0,0,0,0,0,0,0,0,0,,20144,20144,2007,0,7,29943,0.0603958,0,end_turn,1,,probe
+sonnet__single_file__coarse__r5,56894023-6ae6-4bef-b296-d7bf12937d98,D,sonnet,single_file,coarse,5,532,2,2,3.759,0,0,0,0,0,0,0,0,0,,21036,21036,1757,0,7,27079,0.062386199999999996,0,end_turn,1,,probe

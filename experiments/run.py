@@ -29,8 +29,13 @@ import yaml
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import fixture_path
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FIXTURE = os.path.join(ROOT, "experiments", "fixture")
+# fixture はリポジトリの外に置く（issue #42）。experiments/ の下に置くと、
+# cwd の祖先にあるこのリポジトリの CLAUDE.md が被験体に渡る。場所の正は fixture_path.py。
+FIXTURE = fixture_path.resolve()
 RUNS = os.path.join(ROOT, "experiments", "runs")
 
 # メンターに渡ってよいツール。learn.md の tools: と一致していなければならない。
@@ -43,8 +48,62 @@ TURN_TIMEOUT_SEC = 1200
 
 # ---------------------------------------------------------------- 前提チェック
 
-def preflight():
-    """本体プロンプトと fixture 側コピーがずれていないか、fixture が無改変か。"""
+def spec_number_conflicts(spec_path, spec):
+    """同じ実験番号を名乗る spec が他のブランチに無いか。
+
+    番号はそのまま run ディレクトリ名になる。別 worktree で同じ番号の別実験が
+    走ると、取り込んだ瞬間にどちらのデータか分からなくなる。git はファイル名が
+    違えば衝突として扱わないので、マージするまで誰も気づかない。
+    実際に 007 で起きた（008-sonnet-worst と 007-a5-wexfine-pilot）。
+    """
+    base = os.path.basename(spec_path)
+    stem = re.sub(r"\.ya?ml$", "", base)
+    problems = []
+
+    if spec.get("id") != stem:
+        problems.append("spec の id とファイル名が違います（id=%r / ファイル=%r）。\n"
+                        "    run ディレクトリは id で作られるので、ここがずれると\n"
+                        "    spec と結果が対応しなくなります。" % (spec.get("id"), stem))
+
+    m = re.match(r"(\d{3})-", stem)
+    if not m:
+        return problems
+    num = m.group(1)
+
+    def git_out(*args):
+        r = subprocess.run(["git", "-C", ROOT] + list(args), capture_output=True,
+                           text=True, encoding="utf-8", errors="replace")
+        return r.stdout if r.returncode == 0 else ""
+
+    seen = {}
+    refs = [x for x in git_out("for-each-ref", "--format=%(refname:short)",
+                               "refs/heads").split("\n") if x.strip()]
+    for ref in refs:
+        for path in git_out("ls-tree", "-r", "--name-only", ref,
+                            "--", "experiments/specs/").split("\n"):
+            other = os.path.basename(path.strip())
+            if other.startswith(num + "-") and other != base:
+                seen.setdefault(other, []).append(ref)
+
+    for other, branches in sorted(seen.items()):
+        problems.append("実験番号 %s が衝突しています: %s（%s）\n"
+                        "    どちらかを改番してください。先に走ったほうが番号を保持します。"
+                        % (num, other, ", ".join(sorted(set(branches)))))
+    return problems
+
+
+def preflight(spec_path=None, spec=None):
+    """本体プロンプトと fixture 側コピーがずれていないか、fixture が無改変か、
+    実験番号が他のブランチと衝突していないか。"""
+    if spec_path and spec:
+        problems = spec_number_conflicts(spec_path, spec)
+        if problems:
+            print("NG   spec の番号・命名に問題があります:")
+            for p in problems:
+                print("  - " + p)
+            return False
+
+    print("fixture: %s" % FIXTURE)
     # check-sync は v0.2.0 で Bun に移った（配布物と同じ実行系で回す）。
     # 実験ハーネス側は Python のままなので、ここだけ実行系が混ざる。
     bun = shutil.which("bun")
@@ -293,7 +352,7 @@ def main():
               % (len(cells), len(cells) * len(spec["turns"])))
         return 0
 
-    if not preflight():
+    if not preflight(args.spec, spec):
         return 1
 
     # プロンプト自体を実験条件にする場合。バリアント定義を fixture の
@@ -417,6 +476,10 @@ def main():
         json.dump({
             "spec_id": spec["id"],
             "実行日時": datetime.now(timezone.utc).isoformat(),
+            "fixture_path": FIXTURE,
+            # 被験体の文脈に混入した CLAUDE.md。preflight が空でなければ止めるので
+            # 通常は [] になるが、記録が無いと後から「無かった」ことを示せない（#42）。
+            "混入した CLAUDE_md": fixture_path.claude_md_in_scope(FIXTURE),
             "fixture_sha": head,
             "claude_version": ver,
             "spec": spec,
