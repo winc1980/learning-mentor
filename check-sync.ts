@@ -12,10 +12,17 @@
  *
  * 使い方:
  *     bun check-sync.ts
+ *     bun check-sync.ts --hash [--agent-body] [<path>|-]
  *
  * 終了コード: 一致していれば 0、ずれていれば 1
+ *
+ * --hash は本文の同一性を 1 行のハッシュで出す。実験ハーネス（Python）が
+ * 「その run がどの本文で走ったか」を manifest に残すために呼ぶ。
+ * 正規化の規則を Python 側に書き写すと規則が 2 つになり、片方だけ直したときに
+ * 静かにずれる。規則は normalize() ただ 1 つに保ち、呼ぶ側が実行系をまたぐ。
  */
 
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 
@@ -63,7 +70,7 @@ function read(relpath: string): string | null {
  * これは本文の「内容」ではなく「境界」で、mentor-update.ts が貼り直す範囲を
  * 示すために配布物側にだけ入る。行末空白と同じく、吸収すべき差。
  */
-function normalize(text: string): string[] {
+export function normalize(text: string): string[] {
   const lines = text
     .replace(/\r\n/g, "\n")
     .replace(/\r/g, "\n")
@@ -158,6 +165,68 @@ function main(): number {
   return 0;
 }
 
+/**
+ * 正規化した本文の内容ハッシュ。
+ *
+ * 「この run はどの本文で走ったか」を run 間で突き合わせるための ID。
+ * normalize() を通してから取るので、改行コード・行末空白・更新用マーカーの差では
+ * 変わらない。逆に言えば、ここが変われば本文の中身が変わっている。
+ */
+export function bodyHash(text: string): string {
+  return createHash("sha256").update(normalize(text).join("\n"), "utf8").digest("hex");
+}
+
+/**
+ * --hash: 1 ファイル（または標準入力）の本文ハッシュを 1 行で出す。
+ *
+ * --agent-body を付けると frontmatter を落としてから取る。エージェント定義
+ * （learn.md や experiments/variants/*.md）を learning-mentor-prompt.md と
+ * 同じ土俵で比べるため。
+ *
+ * 標準入力を受けるのは、過去の本文を `git show <sha>:<path>` から流し込んで
+ * ハッシュを復元するため（experiments/prompt_version.py --rebuild-history）。
+ */
+async function hashMain(argv: string[]): Promise<number> {
+  let agentBody = false;
+  let target: string | null = null;
+  for (const arg of argv) {
+    if (arg === "--agent-body") {
+      agentBody = true;
+    } else if (target === null) {
+      target = arg;
+    } else {
+      console.error("--hash に渡せる対象は1つだけです");
+      return 2;
+    }
+  }
+
+  let text: string;
+  if (target === "-") {
+    text = await Bun.stdin.text();
+  } else {
+    const found = read(target ?? SOURCE);
+    if (found === null) {
+      console.error(`見つかりません: ${target ?? SOURCE}`);
+      return 1;
+    }
+    text = found;
+  }
+
+  if (agentBody) {
+    const [body, error] = extractFromAgent(text);
+    if (error || body === null) {
+      console.error(`frontmatter を外せません: ${error}`);
+      return 1;
+    }
+    text = body;
+  }
+
+  console.log(bodyHash(text));
+  return 0;
+}
+
 if (import.meta.main) {
-  process.exitCode = main();
+  const argv = process.argv.slice(2);
+  const at = argv.indexOf("--hash");
+  process.exitCode = at === -1 ? main() : await hashMain(argv.slice(at + 1));
 }

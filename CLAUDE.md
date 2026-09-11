@@ -52,6 +52,22 @@ CLAUDE.md は被験体のプロジェクト指示として読み込まれるの�
 
 実験データ本体。過去の応答と採点結果がそのまま入っている。再取得には実費がかかる。
 
+**あとから分かったことを manifest に足すのもしない。** manifest は取得時の事実の記録で、
+推定した値を同じ場所に混ぜると「実行時に記録された事実」と「後から復元した推定」の区別が
+消える。#43 より前の run の本文を git から復元した対応表は、外に由来付きで置いてある
+（[experiments/prompt-history.json](experiments/prompt-history.json)）。
+
+### run を並べる前に、本文が同じかを照合する
+
+`check-sync.ts` が保証するのは**本文とコピーが揃っていること**で、**その本文が比較先の
+run の本文と同じか**は見ていない。だから本文の違う run を並べても検査は全部通り、
+**比較した結果の解釈だけが静かに間違う。** 013 で実際に起きた（#43）。
+
+いまは `manifest.json` の `本文` に、被験体が実際に読んだファイルのハッシュが残る。
+`analyze.py` / `analyze5.py` に run を 2 つ以上渡すと、集計の前に照合が走る。spec に
+`compare_with:` を書けば、回す前に `run.py` が止める。**ヘッダのコメントに「002 と比較」と
+書くだけでは誰も照合しない。** 詳しくは [experiments/README.md](experiments/README.md)。
+
 ### ルーブリックには版がある
 
 版 1（run 001〜006）と版 2 では **L3/L4 の意味が逆**。集計時に版を混ぜると
@@ -122,6 +138,8 @@ python experiments/verify-fixture.py                       # fixture が汚れ�
 python experiments/run.py experiments/specs/<spec>.yaml     # 実験を回す
 python experiments/blind.py make <run-id>                   # 盲検バッチを作る
 python experiments/analyze.py <run-id>                      # 条件ごとに集計する
+python experiments/analyze.py <run-id> <run-id>             # 並べる（本文の照合が先に走る）
+python experiments/prompt_version.py <run-id> <run-id>      # 並べてよいかだけ見る
 ```
 
 `python` が無い環境では `py -3`。
