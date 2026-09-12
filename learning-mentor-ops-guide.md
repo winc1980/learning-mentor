@@ -18,6 +18,7 @@ AIに「学習と解説だけをする」役割を与えるための設定です
 | `learning-mentor-prompt.md` | 役割定義そのもの。**唯一のソース。** 更新するときはここだけ直す |
 | `learning-mentor-setup.md` | 環境ごとの配置をAIにやらせるためのプロンプト |
 | `learning-mentor-usage.md` | **使い方。** 解説・レビュー・トラブル対応の3モードと、追加でできること（GitHub MCP・運用A / B・モデル）。**README は導入までを担い、使い方はこちらが持つ。** まだ配れない選択肢は [docs/tuning-options.md](https://github.com/winc1980/learning-mentor/blob/main/docs/tuning-options.md) に置く（リポジトリ内の文書なので zip には入らない） |
+| `learning-mentor-codex-install.md` | **Codex を無料で用意する手順（Windows）。** 何も入れていない人向けの入口で、README の導入手順へ橋渡しする。**この種の手順は確実に古くなるので、食い違いの報告を受ける前提で置いている** |
 | `learning-mentor-ops-guide.md` | この文書（運営側向け） |
 | `check-sync.ts` | **本文のコピーがずれていないか確認するスクリプト。** 本体を更新したら実行する（Bun） |
 | `.claude/agents/learn.md` | **参照実装。** 本体プロンプトに frontmatter を付けただけのもの。`claude --agent learn` で起動して動作を確かめる用。**本文は `learning-mentor-prompt.md` のコピーなので、本体を更新したら作り直す** |
