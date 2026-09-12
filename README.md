@@ -51,6 +51,8 @@ npm install が途中で落ちます
 
 **3の動作確認まで通して、はじめて導入完了です。**
 
+> **AI コーディングツールをまだ何も入れていない人へ。**Codex を**無料で**用意するところから案内があります → **[learning-mentor-codex-install.md](learning-mentor-codex-install.md)**
+
 **[Bun](https://bun.sh) が必要です。** phase2 web学習会の環境には導入済みです。
 `bun --version` が答えれば準備できています。答えない場合は上のリンクから入れてください。
 
